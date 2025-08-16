@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "carrerpath": {
+      "type": "http",
+      "url": "https://localhost-1a5951b7.deco.host/mcp"
+    }
+  }
+}

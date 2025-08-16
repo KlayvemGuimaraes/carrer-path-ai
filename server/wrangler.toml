@@ -1,0 +1,39 @@
+#:schema node_modules/@deco/workers-runtime/config-schema.json
+name = "carrerpath"
+main = "main.ts"
+compatibility_date = "2025-06-17"
+compatibility_flags = [ "nodejs_compat" ]
+scope = "klayvem"
+
+[assets]
+directory = "./view-build"
+binding = "ASSETS"
+
+[deco]
+workspace = "klayvem"
+enable_workflows = true
+local = true
+
+[[deco.bindings]]
+name = "AI_GATEWAY"
+type = "mcp"
+integration_id = "i:ai-generation"
+
+[[deco.bindings]]
+name = "CARRERPATH"
+type = "mcp"
+integration_id = "i:9019137d-e151-435b-81ec-d103b27480ac"
+
+[[migrations]]
+tag = "v1"
+new_classes = [ "Workflow" ]
+
+[durable_objects]
+[[durable_objects.bindings]]
+name = "DECO_CHAT_WORKFLOW_DO"
+class_name = "Workflow"
+
+[[rules]]
+type = "Text"
+globs = [ "**/*.sql" ]
+fallthrough = true

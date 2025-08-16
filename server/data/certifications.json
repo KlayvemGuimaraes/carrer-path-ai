@@ -1,0 +1,62 @@
+[
+  {
+    "id": "aws-cp",
+    "name": "AWS Certified Cloud Practitioner",
+    "provider": "AWS",
+    "area": "cloud",
+    "level": "iniciante",
+    "skills": ["aws-basics", "cloud-fundamentals"],
+    "roles": ["desenvolvedor", "devops", "analista-infra"],
+    "prerequisites": [],
+    "durationHours": 25,
+    "estimatedCostUSD": 100
+  },
+  {
+    "id": "aws-saa",
+    "name": "AWS Solutions Architect - Associate",
+    "provider": "AWS",
+    "area": "cloud",
+    "level": "intermediario",
+    "skills": ["solutions-arch", "vpc", "ha-dr"],
+    "roles": ["devops", "arquiteto-cloud"],
+    "prerequisites": ["aws-cp"],
+    "durationHours": 60,
+    "estimatedCostUSD": 150
+  },
+  {
+    "id": "az-900",
+    "name": "Microsoft Azure Fundamentals (AZ-900)",
+    "provider": "Microsoft",
+    "area": "cloud",
+    "level": "iniciante",
+    "skills": ["azure-basics", "cloud-fundamentals"],
+    "roles": ["desenvolvedor", "devops", "analista-infra"],
+    "prerequisites": [],
+    "durationHours": 25,
+    "estimatedCostUSD": 99
+  },
+  {
+    "id": "pmi-capm",
+    "name": "PMI CAPM",
+    "provider": "PMI",
+    "area": "gestao",
+    "level": "iniciante",
+    "skills": ["project-management", "processos"],
+    "roles": ["pm", "analista-projetos"],
+    "prerequisites": [],
+    "durationHours": 40,
+    "estimatedCostUSD": 225
+  },
+  {
+    "id": "comptia-security-plus",
+    "name": "CompTIA Security+",
+    "provider": "CompTIA",
+    "area": "seguranca",
+    "level": "intermediario",
+    "skills": ["network-security", "risk", "threats"],
+    "roles": ["sec-analyst", "soc-analyst", "sysadmin"],
+    "prerequisites": [],
+    "durationHours": 70,
+    "estimatedCostUSD": 370
+  }
+]
