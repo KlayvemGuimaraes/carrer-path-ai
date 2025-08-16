@@ -15,12 +15,12 @@ export function scoreCertification(c: Certification, p: z.infer<typeof UserProfi
 
   // Match by role
   if (p.role && c.roles.map(r => r.toLowerCase()).includes(p.role.toLowerCase())) {
-    score += 40;
+    score += 35; // ligeiramente menor que antes para dar espaço a área/metas
     reasons.push(`Alinhada ao cargo (${p.role})`);
   }
   // Match by target area
   if (p.targetArea && (c.area || "").toLowerCase() === p.targetArea.toLowerCase()) {
-    score += 30;
+    score += 40; // priorizar área-alvo
     reasons.push(`Foco na área desejada (${p.targetArea})`);
   }
   // Match by seniority
@@ -40,19 +40,23 @@ export function scoreCertification(c: Certification, p: z.infer<typeof UserProfi
   // Match by budget
   if (typeof p.budgetUSD === "number" && typeof c.estimatedCostUSD === "number") {
     if (c.estimatedCostUSD <= p.budgetUSD) {
-      score += 10;
+      score += 5; // orçamento ajuda, mas não domina
       reasons.push("Dentro do orçamento");
     } else {
-      score -= 10;
+      score -= 5; // penalidade mais suave
       reasons.push("Acima do orçamento");
     }
   }
 
   // Match by goals
   if (p.goals?.length) {
-    const hit = p.goals.some(g => (c.skills || []).some(s => s.toLowerCase().includes(g.toLowerCase())));
-    if (hit) {
-      score += 10;
+    const goalsLower = p.goals.map(g => g.toLowerCase());
+    const skillsLower = (c.skills || []).map(s => s.toLowerCase());
+    const hits = goalsLower.filter(g => skillsLower.some(s => s.includes(g)));
+    if (hits.length > 0) {
+      // até 5 metas, 5 pontos cada, máximo 25
+      const add = Math.min(25, hits.length * 5);
+      score += add;
       reasons.push("Cobre metas declaradas");
     }
   }

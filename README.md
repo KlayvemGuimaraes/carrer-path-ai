@@ -65,6 +65,54 @@ and the React frontend.
 - **`npm run gen:self`** - Generate types for your own tools/workflows
 - **`npm run deploy`** - Deploy to production
 
+## 🧪 Project — CareerAI (This Repo)
+
+### How to Run Locally
+
+```bash
+# Terminal 1: backend (Cloudflare Workers via Wrangler)
+npm --prefix server run dev
+
+# Terminal 2: frontend (Vite)
+npm --prefix view run dev
+```
+
+- Backend on http://localhost:8787
+- Frontend on http://localhost:4000 (proxy /api/* → 8787)
+
+If port 8787 is busy on Windows:
+
+```
+netstat -ano | findstr :8787
+taskkill /PID <PID> /F
+```
+
+### Endpoints
+
+- `POST /api/recommend` — Recomendação de certificações via Tool MCP tipada
+  - input: `UserProfile` (vide `server/schemas.ts`)
+  - output: `{ items: RecommendationItem[] }`
+- `POST /api/ai/explain` — Explicação por IA (usa `DECO_CHAT_WORKSPACE_API`)
+
+### Architecture
+
+- Server
+  - `server/main.ts` — Router (`/api/recommend`, `/api/ai/explain`)
+  - `server/tools/certRecommend.ts` — Tool MCP (id: `CERT_RECOMMEND`)
+  - `server/util/catalog.ts` — Catálogo estático validado via Zod
+  - `server/schemas.ts` — Schemas Zod (tipagem end‑to‑end)
+- Frontend
+  - `view/src/App.tsx` — Form, lista de recomendações e ação “Explicar com IA”
+  - `view/public/manifest.json` — Manifest para limpar aviso no console
+
+### Checklist (Sim/Não)
+
+- Funcionalidade fim‑a‑fim: Sim (form → `/api/recommend` → render)
+- Integração tipada (MCP): Sim (Tool `CERT_RECOMMEND` no endpoint)
+- Views operáveis (UI/UX): Sim (inputs, loading, erros)
+- Funcionalidade agêntica: Parcial (depende de créditos para IA)
+- Qualidade da entrega: Parcial (este README + manifest; vídeo ≤ 90s pendente)
+
 ## 🔗 Frontend ↔ Server Communication
 
 The template includes a fully-typed RPC client that connects your React frontend

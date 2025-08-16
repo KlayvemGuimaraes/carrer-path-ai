@@ -9,8 +9,7 @@ import { type Env as DecoEnv, StateSchema } from "./deco.gen.ts";
 import { tools } from "./tools/index.ts";
 import { workflows } from "./workflows.ts";
 import { RecommendationResponseSchema, UserProfileSchema } from "./schemas.ts";
-import { loadCatalog } from "./util/catalog.ts";
-import { scoreCertification } from "./util/scoring.ts";
+import createCertRecommendTool from "./tools/certRecommend.ts";
 
 /**
  * This Env type is the main context object that is passed to
@@ -37,14 +36,10 @@ async function handleRecommend(request: Request, env: Env): Promise<Response> {
     const rawProfile = (body && body.profile) ? body.profile : body;
     const profile = UserProfileSchema.parse(rawProfile);
 
-    // Calcula recomendações diretamente (evita incompatibilidades de API do workflow)
-    const catalog = await loadCatalog();
-    const scored = catalog.map((c) => {
-      const { score, reasons } = scoreCertification(c, profile);
-      return { certification: c, score, reasons };
-    });
-    const items = scored.sort((a, b) => b.score - a.score).slice(0, 5);
-    return Response.json({ items });
+    // Usa a Tool MCP tipada para gerar recomendações
+    const recommendTool = createCertRecommendTool(env);
+    const result = await (recommendTool as any).execute({ context: profile });
+    return Response.json(result);
   } catch (error) {
     // Provide clearer validation feedback
     if (error && typeof error === "object" && "issues" in (error as any)) {

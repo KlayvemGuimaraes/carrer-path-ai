@@ -24,6 +24,8 @@ export default function App() {
   // Estado para a explicação por IA
   const [aiAnswer, setAiAnswer] = useState<string>("");
   const [userQuestion, setUserQuestion] = useState<string>("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,27 +177,44 @@ export default function App() {
           />
           <button
             onClick={async () => {
+              setAiError(null);
               setAiAnswer("");
-              const res = await fetch("/api/ai/explain", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  profile: {
-                    role, seniority, targetArea,
-                    goals: goals.split(",").map(s => s.trim()).filter(Boolean),
-                    budgetUSD: budgetUSD === '' ? undefined : Number(budgetUSD),
-                  },
-                  recommendations: { items },
-                  question: userQuestion,
-                }),
-              });
-              const data = await res.json();
-              setAiAnswer(data.answer || "");
+              setAiLoading(true);
+              try {
+                const res = await fetch("/api/ai/explain", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    profile: {
+                      role, seniority, targetArea,
+                      goals: goals.split(",").map(s => s.trim()).filter(Boolean),
+                      budgetUSD: budgetUSD === '' ? undefined : Number(budgetUSD),
+                    },
+                    recommendations: { items },
+                    question: userQuestion,
+                  }),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                  const msg = data?.error || `Falha na IA (HTTP ${res.status})`;
+                  throw new Error(msg);
+                }
+                setAiAnswer(data.answer || "");
+              } catch (e: any) {
+                setAiError(e?.message || "Não foi possível obter a explicação por IA. Verifique créditos.");
+              } finally {
+                setAiLoading(false);
+              }
             }}
-            className="mt-2 inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 shadow-md transition-colors"
+            disabled={aiLoading}
+            className="mt-2 inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 shadow-md transition-colors"
           >
-            Explicar recomendações com IA
+            {aiLoading ? "Gerando explicação..." : "Explicar recomendações com IA"}
           </button>
+
+          {aiError && (
+            <p className="text-red-400 text-sm mt-2">{aiError}</p>
+          )}
 
           {aiAnswer && (
             <div className="whitespace-pre-wrap border border-slate-700 bg-slate-900/40 text-slate-100 p-3 rounded-lg mt-3">
