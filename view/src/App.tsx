@@ -17,10 +17,10 @@ type RecommendationItem = {
 };
 
 export default function App() {
-  const [role, setRole] = useState("desenvolvedor");
-  const [seniority, setSeniority] = useState<"junior"|"pleno"|"senior">("junior");
+  const [role, setRole] = useState("DevOps");
+  const [seniority, setSeniority] = useState<"junior"|"pleno"|"senior">("senior");
   const [targetArea, setTargetArea] = useState("cloud");
-  const [goals, setGoals] = useState("arquitetura,ha-dr");
+  const [goals, setGoals] = useState("Aprender sobre Arquitetura, Aumento de salário, Especialização");
   const [budgetUSD, setBudget] = useState<number | ''>('');
   const [items, setItems] = useState<RecommendationItem[]>([]);
   const [loading, setLoading] = useState(false);
