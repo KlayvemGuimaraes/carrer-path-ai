@@ -1,46 +1,73 @@
-# CarrerPath — Recomendações de Certificações (MCP + View Agêntica)
+# CarrerPath — Plataforma de Desenvolvimento Profissional
 
-Mini‑app full‑stack usando MCP tipado (Deco + Cloudflare Workers) e React/Vite.
-Entrega voltada ao Lab Prático (15/08, 10h–16h BRT) e ao Badge de Expert.
+Uma plataforma moderna e elegante para avaliação de perfis profissionais, recomendações de certificações e planejamento de carreira, inspirada no design da LoVable e Vercel.
 
-## ✨ Features
+## ✨ Features Principais
 
-- **🤖 MCP Server**: Cloudflare Workers-based server with typed tools and
-  workflows
-- **⚛️ React Frontend**: Modern React app with Vite, TanStack Router, and
-  Tailwind CSS
-- **🎨 UI Components**: Pre-configured shadcn/ui components for rapid
-  development
-- **🔧 Type Safety**: Full TypeScript support with auto-generated RPC client
-  types
-- **🚀 Hot Reload**: Live development with automatic rebuilding for both
-  frontend and backend
-- **☁️ Ready to Deploy**: One-command deployment to Cloudflare Workers
+### 🎨 **UI/UX Moderna**
+- **Design Inspirado na LoVable/Vercel**: Interface limpa, minimalista e profissional
+- **Paleta de Cores Moderna**: Gradientes sutis, glass morphism e animações fluidas
+- **Responsivo**: Layout adaptável para todos os dispositivos
+- **Tipografia Elegante**: Fonte Inter para máxima legibilidade
+- **Animações Suaves**: Transições e micro-interações para melhor experiência
 
-## 🎯 Objetivo do Lab
+### 🤖 **Avaliação de Perfis**
+- **GitHub Profile Analysis**: 
+  - Scoring numérico de 0-100
+  - Análise de repositórios, linguagens e atividade
+  - Identificação de pontos fortes e fracos
+  - Recomendações personalizadas para melhoria
+  - Métricas de qualidade do código e contribuições
 
-- Construir, publicar e demonstrar um mini‑app com dados públicos ou tema livre.
-- Entrega “fim‑a‑fim”: input do usuário → MCP tipado → View → funcionalidade agêntica.
-- Vídeo curto (≤ 90s), README claro, repo limpo.
+- **LinkedIn Profile Analysis**:
+  - Avaliação completa de perfis profissionais
+  - Análise de experiências, educação e habilidades
+  - Detecção automática de senioridade
+  - Scoring baseado em completude e qualidade
+  - Recomendações para otimização do perfil
 
-Este projeto escolhe a opção B (Tema Livre): recomendações de certificações.
+### 📚 **Sistema de Certificações**
+- **Recomendações Inteligentes**: Baseadas em perfil, objetivos e orçamento
+- **Scoring Avançado**: Algoritmo que considera múltiplos fatores
+- **Exportação PDF**: Geração automática de planos de estudo
+- **Integração com IA**: Explicações e insights personalizados
 
-Checklist (Sim/Não):
-- __Funcionalidade fim‑a‑fim__: Sim
-- __Integração tipada (MCP)__: Sim (Tool `CERT_RECOMMEND`)
-- __Views operáveis (UI/UX)__: Sim
-- __Funcionalidade agêntica__: Sim, com fallback local quando IA indisponível
-- __Qualidade da entrega__: Sim (README, setup, vídeo pendente)
+### 🚀 **Arquitetura Técnica**
+- **MCP Server**: Cloudflare Workers com tools tipadas
+- **Frontend React**: Vite + Tailwind CSS + TypeScript
+- **RPC Tipado**: Comunicação segura entre frontend e backend
+- **Hot Reload**: Desenvolvimento com recarregamento automático
+
+## 🎯 **Melhorias Implementadas**
+
+### **GitHub Evaluation v2.0**
+- ✅ **Scoring Numérico**: Sistema de pontuação de 0-100
+- ✅ **Análise de Qualidade**: Avaliação de repositórios e código
+- ✅ **Métricas Avançadas**: Atividade recente, diversidade de linguagens
+- ✅ **Pontos Fortes/Fracos**: Identificação automática de áreas
+- ✅ **Recomendações**: Sugestões personalizadas para melhoria
+
+### **LinkedIn Evaluation v2.0**
+- ✅ **Scraping Aprimorado**: Múltiplas estratégias de parsing
+- ✅ **Análise Completa**: Experiências, educação, habilidades
+- ✅ **Detecção de Senioridade**: IA para identificar nível profissional
+- ✅ **Scoring Inteligente**: Baseado em completude e qualidade
+- ✅ **Recomendações Profissionais**: Sugestões para otimização
+
+### **UI/UX Moderna**
+- ✅ **Design System**: Paleta de cores inspirada na LoVable/Vercel
+- ✅ **Glass Morphism**: Efeitos visuais modernos e elegantes
+- ✅ **Animações**: Transições suaves e micro-interações
+- ✅ **Responsividade**: Layout adaptável para todos os dispositivos
+- ✅ **Tipografia**: Fonte Inter para máxima legibilidade
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-
 - Node.js ≥22.0.0
 - [Deco CLI](https://deco.chat): `npm i -g deco-cli`
 
 ### Setup
-
 ```bash
 # Install dependencies
 npm install
@@ -59,13 +86,17 @@ O servidor sobe em `http://localhost:8787` (API/MCP) e o front em `http://localh
 ```
 ├── server/           # MCP Server (Cloudflare Workers + Deco runtime)
 │   ├── main.ts      # Server entry point with tools & workflows
+│   ├── tools/       # Enhanced evaluation tools
+│   │   ├── githubEval.ts    # GitHub profile analysis v2.0
+│   │   └── linkedinEval.ts  # LinkedIn profile analysis v2.0
 │   └── deco.gen.ts  # Auto-generated integration types
 └── view/            # React Frontend (Vite + Tailwind CSS)
     ├── src/
-    │   ├── lib/rpc.ts    # Typed RPC client for server communication
-    │   ├── routes/       # TanStack Router routes
-    │   └── components/   # UI components with Tailwind CSS
-    └── package.json
+    │   ├── App.tsx          # Main application with modern UI
+    │   ├── styles.css       # Enhanced CSS with animations
+    │   ├── lib/rpc.ts       # Typed RPC client
+    │   └── routes/          # TanStack Router routes
+    └── tailwind.config.js   # Tailwind configuration
 ```
 
 ## 🛠️ Development Workflow
@@ -75,119 +106,114 @@ O servidor sobe em `http://localhost:8787` (API/MCP) e o front em `http://localh
 - **`npm run gen:self`** - Generate types for your own tools/workflows
 - **`npm run deploy`** - Deploy to production
 
-## 🧪 Project — CarrerPath (This Repo)
+## 🔍 **Funcionalidades Detalhadas**
 
-### How to Run Locally
+### **GitHub Profile Analysis**
+O sistema analisa perfis GitHub considerando:
+- **Completude do Perfil** (0-20 pts): Nome, bio, empresa, localização
+- **Prova Social** (0-25 pts): Seguidores, alcance da comunidade
+- **Atividade de Repositórios** (0-30 pts): Quantidade e qualidade
+- **Qualidade do Código** (0-15 pts): Estrelas, forks, manutenção
+- **Diversidade de Linguagens** (0-10 pts): Múltiplas tecnologias
+
+### **LinkedIn Profile Analysis**
+Avaliação profissional baseada em:
+- **Completude do Perfil** (0-25 pts): Nome, headline, resumo
+- **Seção de Experiências** (0-30 pts): Quantidade e detalhamento
+- **Formação Educacional** (0-15 pts): Instituições e diplomas
+- **Habilidades e Endossos** (0-20 pts): Competências e validação
+- **Qualidade dos Dados** (0-10 pts): Atualização e precisão
+
+### **Sistema de Recomendações**
+- **Algoritmo Inteligente**: Considera múltiplos fatores para scoring
+- **Personalização**: Baseado em objetivos e contexto profissional
+- **IA Integrada**: Explicações e insights personalizados
+- **Exportação**: Planos de estudo em PDF
+
+## 🎨 **Design System**
+
+### **Paleta de Cores**
+- **Primária**: Azul moderno com gradientes sutis
+- **Secundária**: Tons de slate para elementos neutros
+- **Acentos**: Verde para sucessos, laranja para melhorias
+- **Backgrounds**: Gradientes suaves e glass morphism
+
+### **Tipografia**
+- **Fonte Principal**: Inter (Google Fonts)
+- **Hierarquia**: Tamanhos consistentes e espaçamento generoso
+- **Legibilidade**: Alto contraste e tamanhos adequados
+
+### **Componentes**
+- **Cards**: Glass morphism com bordas sutis
+- **Botões**: Gradientes e hover effects
+- **Inputs**: Bordas arredondadas e focus states
+- **Animações**: Transições suaves e micro-interações
+
+## 🧪 **Testando as Funcionalidades**
+
+### **GitHub Evaluation**
+1. Insira uma URL do GitHub (ex: `https://github.com/torvalds`)
+2. Clique em "Avaliar"
+3. Visualize o score, pontos fortes/fracos e recomendações
+
+### **LinkedIn Evaluation**
+1. Insira uma URL do LinkedIn (ex: `https://linkedin.com/in/username`)
+2. Clique em "Avaliar"
+3. Analise o perfil profissional completo
+
+### **Certificações**
+1. Preencha o formulário com seus dados
+2. Receba recomendações personalizadas
+3. Exporte seu plano de estudo em PDF
+4. Use a IA para explicações adicionais
+
+## 🚀 **Deploy**
 
 ```bash
-# Terminal 1: backend (Cloudflare Workers via Wrangler)
-npm --prefix server run dev
-
-# Terminal 2: frontend (Vite)
-npm --prefix view run dev
+# Deploy to Cloudflare Workers
+npm run deploy
 ```
 
-- Backend on http://localhost:8787
-- Frontend on http://localhost:4000 (proxy /api/* → 8787)
+A aplicação fica disponível em URL pública e pode ser usada como servidor MCP por agentes de IA.
 
-If port 8787 is busy on Windows:
+## 🔗 **Integrações**
 
-```
-netstat -ano | findstr :8787
-taskkill /PID <PID> /F
-```
+- **GitHub API**: Análise de perfis e repositórios
+- **LinkedIn Scraping**: Avaliação de perfis profissionais
+- **IA Integration**: Explicações e insights personalizados
+- **PDF Generation**: Exportação de planos de estudo
 
-### Endpoints
+## 📚 **Tecnologias Utilizadas**
 
-- `POST /api/recommend` — recomendações via Tool MCP tipada (`CERT_RECOMMEND`)
-  - Input: `UserProfile` (`role`, `seniority`, `targetArea?`, `goals[]`, `budgetUSD?`)
-  - Output: `{ items: { certification, score, reasons }[] }`
-- `POST /api/ai/explain` — explicação por IA (usa `DECO_CHAT_WORKSPACE_API`)
-  - Se a IA falhar (créditos/permissionamento), retornamos fallback determinístico
-    com `meta: { ai: "unavailable", reference }`.
+- **Backend**: Cloudflare Workers, Deco Runtime, TypeScript
+- **Frontend**: React, Vite, Tailwind CSS, TypeScript
+- **RPC**: TanStack Query, TypeScript RPC
+- **Design**: Glass morphism, gradientes, animações CSS
+- **Deploy**: Cloudflare Workers, Deco Platform
 
-### Architecture
+## 🎯 **Roadmap Futuro**
 
-- __Server__
-  - `server/main.ts` — Router (`/api/recommend`, `/api/ai/explain`) e fallback de IA
-  - `server/tools/certRecommend.ts` — Tool MCP `CERT_RECOMMEND` (tipada)
-    - helper tipado `runCertRecommend(env, profile)` (evita casts)
-    - logs estruturados: `[CERT_RECOMMEND] role=... area=... top=... ms=...`
-  - `server/util/catalog.ts` — carregamento/validação do catálogo
-  - `server/util/scoring.ts` — função `scoreCertification()` (pesos abaixo)
-  - `server/schemas.ts` — Schemas Zod (tipagem de ponta a ponta)
-- __Frontend__
-  - `view/src/App.tsx` — formulário, top recomendações, botão “Explicar com IA”
-  - Proxy Vite → `/api/*`
+- [ ] **Análise de Portfólios**: Avaliação de sites e projetos
+- [ ] **Comparação de Perfis**: Benchmarking entre profissionais
+- [ ] **Marketplace de Certificações**: Integração com provedores
+- [ ] **Mentoria IA**: Coaching personalizado para carreira
+- [ ] **Analytics Avançado**: Métricas de evolução profissional
 
-## 🔎 MCP — Como foi aplicado
+## 🤝 **Contribuição**
 
-- Tool MCP tipada `CERT_RECOMMEND` (input: `UserProfile`, output: `RecommendationResponse`).
-- O endpoint `/api/recommend` chama a Tool via helper `runCertRecommend()`.
-- Workflows estão registrados em `server/workflows.ts` (demonstração do padrão `createStepFromTool`).
+Contribuições são bem-vindas! Por favor:
+1. Fork o projeto
+2. Crie uma branch para sua feature
+3. Commit suas mudanças
+4. Push para a branch
+5. Abra um Pull Request
 
-## 🧠 Scoring (regras atuais)
+## 📄 **Licença**
 
-- __Área‑alvo__: +40
-- __Cargo__: +35
-- __Metas (`goals`)__: até +25 (5 pontos por match, máx 5)
-- __Senioridade__: +20 iniciante/júnior, +15 pleno, +20 avançado/sênior
-- __Orçamento__: +5 (dentro) / −5 (acima)
-
-Motivos retornados em `reasons` são exibidos na UI.
-
-## 📚 Catálogo
-
-Arquivo: `server/data/certifications.json`. Cobre Cloud (AWS/Azure/GCP), Segurança
-(Security+/PenTest+/CISSP/CEH/AZ‑500), Redes (CCNA/Network+), Dev/DevOps (CKA/Terraform),
-Gestão (CAPM/PSM I), Dados/BI/ML (PL‑300/DP‑203/GCP PDE/AWS DA Specialty/AWS ML Specialty/AI‑102/TF Dev).
-
-## 🧪 Testar localmente (fluxo)
-
-1) `npm --prefix server run dev` (http://localhost:8787)
-2) `npm --prefix view run dev` (http://localhost:4000)
-3) Preencha o formulário, clique “Recomendar”.
-4) Clique “Explicar recomendações com IA”.
-   - Se IA indisponível, verá resposta de fallback e `meta.ai = "unavailable"`.
-
-## 🚀 Deploy
-
-- Cloudflare Workers via Wrangler (backend) e Vite (frontend).
-- Scripts:
-  - `npm run deploy` (template base)
-  - ou pipelines CI/CD conforme seu fork.
-
-## 🎥 Vídeo (≤ 90s)
-
-- Mostre: preenchimento do formulário → recomendações → explicação com IA/fallback → valor pro usuário.
-- Sugestão de roteiro: 20s app, 20s MCP, 20s scoring, 20s IA/fallback e call‑to‑action.
-
-## 📦 Entrega (para o formulário)
-
-- Link do app (deco.page/… ou URL do seu deploy)
-- Link do repositório (este)
-- Link do vídeo curto (≤ 90s)
-
-## 🔗 Frontend ↔ Server Communication
-
-The template includes a fully-typed RPC client that connects your React frontend
-to your MCP server:
-
-```typescript
-// Typed calls to your server tools and workflows
-const result = await client.MY_TOOL({ input: "data" });
-const workflowResult = await client.MY_WORKFLOW({ input: "data" });
-```
-
-## 📖 Learn More
-
-This template is built for deploying primarily on top of the
-[Deco platform](https://deco.chat/about) which can be found at the
-[deco-cx/chat](https://github.com/deco-cx/chat) repository.
-
-Documentation can be found at [https://docs.deco.page](https://docs.deco.page)
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para detalhes.
 
 ---
 
-**Ready to build your next MCP server with a beautiful frontend?
-[Get started now!](https://deco.chat)**
+**CarrerPath** - Transformando o desenvolvimento profissional com tecnologia moderna e design elegante.
+
+**Ready to build your next professional development platform? [Get started now!](https://deco.chat)**

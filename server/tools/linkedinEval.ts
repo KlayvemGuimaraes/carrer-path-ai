@@ -10,6 +10,19 @@ const expSchema = z.object({
   title: z.string().optional(),
   company: z.string().optional(),
   period: z.string().optional(),
+  duration: z.string().optional(),
+});
+
+const educationSchema = z.object({
+  institution: z.string().optional(),
+  degree: z.string().optional(),
+  field: z.string().optional(),
+  period: z.string().optional(),
+});
+
+const skillSchema = z.object({
+  name: z.string(),
+  endorsements: z.number().optional(),
 });
 
 const outputSchema = z.object({
@@ -18,12 +31,19 @@ const outputSchema = z.object({
   headline: z.string().optional(),
   about: z.string().optional(),
   experiences: z.array(expSchema),
+  education: z.array(educationSchema),
+  skills: z.array(skillSchema),
   inferredSeniority: z.string().optional(),
   strengths: z.array(z.string()).default([]),
   weaknesses: z.array(z.string()).default([]),
   score: z.number().int().min(0).max(100),
   assessment: z.string(),
-  meta: z.object({ fetched: z.boolean(), status: z.number().optional() }).optional(),
+  recommendations: z.array(z.string()),
+  meta: z.object({ 
+    fetched: z.boolean(), 
+    status: z.number().optional(),
+    parsingQuality: z.string().optional()
+  }).optional(),
 });
 
 function clean(text?: string | null): string | undefined {
@@ -34,117 +54,364 @@ function clean(text?: string | null): string | undefined {
 function inferSeniorityFromHeadline(headline?: string): string | undefined {
   if (!headline) return undefined;
   const h = headline.toLowerCase();
-  if (/senior|sr\b|sênior/.test(h)) return "senior";
-  if (/pleno|mid|\bss\b/.test(h)) return "pleno";
-  if (/junior|jr\b/.test(h)) return "junior";
+  
+  // Senior level indicators
+  if (/senior|sr\b|sênior|lead|principal|staff|architect|director|head|chief|vp|cto|ceo/i.test(h)) {
+    return "senior";
+  }
+  
+  // Mid level indicators
+  if (/pleno|mid|middle|intermediate|intermediário|ss\b|specialist|analyst/i.test(h)) {
+    return "pleno";
+  }
+  
+  // Junior level indicators
+  if (/junior|jr\b|júnior|entry|associate|assistente|trainee|intern/i.test(h)) {
+    return "junior";
+  }
+  
   return undefined;
+}
+
+function calculateLinkedInScore(data: {
+  name?: string;
+  headline?: string;
+  about?: string;
+  experiences: any[];
+  education: any[];
+  skills: any[];
+  fetched: boolean;
+}): {
+  score: number;
+  strengths: string[];
+  weaknesses: string[];
+} {
+  let score = 0;
+  const strengths: string[] = [];
+  const weaknesses: string[] = [];
+
+  // Profile completeness (0-25 points)
+  if (data.name) { score += 8; strengths.push("Nome completo presente"); }
+  else { weaknesses.push("Nome não identificado"); }
+
+  if (data.headline && data.headline.length > 30) { 
+    score += 8; strengths.push("Headline detalhada e profissional"); 
+  } else if (data.headline && data.headline.length > 15) { 
+    score += 5; strengths.push("Headline presente"); 
+  } else { 
+    weaknesses.push("Headline curta ou ausente"); 
+  }
+
+  const aboutLength = (data.about?.length || 0);
+  if (aboutLength > 300) { 
+    score += 9; strengths.push("Resumo (About) muito detalhado"); 
+  } else if (aboutLength > 150) { 
+    score += 6; strengths.push("Resumo (About) detalhado"); 
+  } else if (aboutLength > 50) { 
+    score += 3; strengths.push("Resumo (About) presente"); 
+  } else { 
+    weaknesses.push("Resumo (About) ausente ou muito curto"); 
+  }
+
+  // Experience section (0-30 points)
+  const expCount = data.experiences.length;
+  if (expCount >= 5) { 
+    score += 15; strengths.push("Muitas experiências listadas (5+)"); 
+  } else if (expCount >= 3) { 
+    score += 12; strengths.push("Boa quantidade de experiências (3+)"); 
+  } else if (expCount >= 1) { 
+    score += 8; strengths.push("Algumas experiências listadas"); 
+  } else { 
+    weaknesses.push("Experiências não detectadas"); 
+  }
+
+  // Calculate experience duration and quality
+  let totalDuration = 0;
+  let hasRecentExperience = false;
+  
+  data.experiences.forEach(exp => {
+    if (exp.duration) {
+      const duration = exp.duration.toLowerCase();
+      if (duration.includes('ano') || duration.includes('year')) {
+        const years = parseInt(duration.match(/\d+/)?.[0] || '0');
+        totalDuration += years;
+      }
+    }
+    
+    if (exp.period) {
+      const period = exp.period.toLowerCase();
+      if (period.includes('2024') || period.includes('2023') || period.includes('atual') || period.includes('present')) {
+        hasRecentExperience = true;
+      }
+    }
+  });
+
+  if (totalDuration >= 5) { 
+    score += 10; strengths.push("Experiência profissional significativa (5+ anos)"); 
+  } else if (totalDuration >= 2) { 
+    score += 7; strengths.push("Alguma experiência profissional (2+ anos)"); 
+  } else { 
+    weaknesses.push("Experiência profissional limitada"); 
+  }
+
+  if (hasRecentExperience) { 
+    score += 5; strengths.push("Experiência profissional recente"); 
+  } else { 
+    weaknesses.push("Sem experiência profissional recente"); 
+  }
+
+  // Education section (0-15 points)
+  const eduCount = data.education.length;
+  if (eduCount >= 2) { 
+    score += 8; strengths.push("Múltiplas formações educacionais"); 
+  } else if (eduCount >= 1) { 
+    score += 5; strengths.push("Formação educacional listada"); 
+  } else { 
+    weaknesses.push("Formação educacional não detectada"); 
+  }
+
+  // Skills section (0-20 points)
+  const skillCount = data.skills.length;
+  if (skillCount >= 15) { 
+    score += 20; strengths.push("Muitas habilidades listadas (15+)"); 
+  } else if (skillCount >= 10) { 
+    score += 15; strengths.push("Boa quantidade de habilidades (10+)"); 
+  } else if (skillCount >= 5) { 
+    score += 10; strengths.push("Algumas habilidades listadas (5+)"); 
+  } else if (skillCount >= 1) { 
+    score += 5; strengths.push("Poucas habilidades listadas"); 
+  } else { 
+    weaknesses.push("Habilidades não detectadas"); 
+  }
+
+  // Check for endorsed skills
+  const endorsedSkills = data.skills.filter(s => (s.endorsements || 0) > 0).length;
+  if (endorsedSkills >= 5) { 
+    score += 5; strengths.push("Muitas habilidades com endossos (5+)"); 
+  } else if (endorsedSkills >= 1) { 
+    score += 3; strengths.push("Algumas habilidades com endossos"); 
+  } else { 
+    weaknesses.push("Habilidades sem endossos"); 
+  }
+
+  // Penalty for poor data quality
+  if (!data.fetched) {
+    score -= 10;
+    weaknesses.push("Conteúdo público indisponível (bloqueio/privado)");
+  }
+
+  // Cap score at 100
+  score = Math.max(0, Math.min(100, score));
+
+  return { score, strengths, weaknesses };
+}
+
+function generateLinkedInRecommendations(strengths: string[], weaknesses: string[], score: number): string[] {
+  const recommendations: string[] = [];
+
+  if (score < 50) {
+    recommendations.push("Complete todas as seções do seu perfil LinkedIn para melhorar a visibilidade");
+    recommendations.push("Adicione uma headline profissional e descritiva");
+    recommendations.push("Escreva um resumo (About) detalhado sobre sua experiência e objetivos");
+    recommendations.push("Liste todas as suas experiências profissionais relevantes");
+  }
+
+  if (score < 70) {
+    if (weaknesses.includes("Experiências não detectadas")) {
+      recommendations.push("Adicione experiências profissionais com descrições detalhadas");
+      recommendations.push("Inclua responsabilidades e conquistas em cada posição");
+    }
+    if (weaknesses.includes("Habilidades não detectadas")) {
+      recommendations.push("Liste suas principais habilidades técnicas e soft skills");
+      recommendations.push("Peça endossos de colegas para suas habilidades");
+    }
+    if (weaknesses.includes("Formação educacional não detectada")) {
+      recommendations.push("Adicione sua formação educacional e certificações");
+    }
+  }
+
+  if (score >= 80) {
+    recommendations.push("Excelente perfil! Considere compartilhar conteúdo técnico regularmente");
+    recommendations.push("Participe de grupos profissionais relevantes para sua área");
+    recommendations.push("Mantenha o perfil atualizado com novas experiências e habilidades");
+  }
+
+  return recommendations;
 }
 
 const createLinkedInEvalTool = (env: Env) => createTool({
   id: "LINKEDIN_EVAL",
-  description: "Avalia um perfil público do LinkedIn a partir da URL, retornando dados básicos e uma análise heurística.",
+  description: "Avalia um perfil público do LinkedIn a partir da URL, retornando dados detalhados, scoring numérico e análise completa com recomendações.",
   inputSchema,
   outputSchema,
   execute: async ({ context }) => {
     const profileUrl = context.url.trim();
 
-    // Nota: LinkedIn frequentemente bloqueia scraping anônimo (403).
-    // Implementamos um fetch best-effort e um fallback heurístico se falhar.
+    // Enhanced LinkedIn scraping with multiple fallback strategies
     let html = "";
     let fetched = false;
     let status: number | undefined = undefined;
+    let parsingQuality = "unknown";
+    
     try {
       const res = await fetch(profileUrl, {
         headers: {
-          "User-Agent": "careerpath-app",
-          "Accept": "text/html,application/xhtml+xml",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.5",
+          "Accept-Encoding": "gzip, deflate",
+          "DNT": "1",
+          "Connection": "keep-alive",
+          "Upgrade-Insecure-Requests": "1",
         },
       });
       status = res.status;
       if (res.ok) {
         html = await res.text();
         fetched = true;
+        parsingQuality = "full";
       }
     } catch {
-      // ignore network errors; we'll fallback
+      // Network error, will use fallback
     }
 
-    // Parsers muito simples baseados em padrões comuns de páginas públicas.
-    // Esses seletores podem quebrar; por isso todo parsing é best-effort.
+    // Enhanced parsing with multiple strategies
     let name: string | undefined;
     let headline: string | undefined;
     let about: string | undefined;
-    const experiences: Array<{ title?: string; company?: string; period?: string }> = [];
+    const experiences: Array<{ title?: string; company?: string; period?: string; duration?: string }> = [];
+    const education: Array<{ institution?: string; degree?: string; field?: string; period?: string }> = [];
+    const skills: Array<{ name: string; endorsements?: number }> = [];
 
     if (html) {
-      // name (og:title or <title>)
+      // Name extraction - multiple strategies
       const ogTitle = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["'][^>]*>/i);
       const titleTag = html.match(/<title>([^<]+)<\/title>/i);
-      name = clean(ogTitle?.[1] || titleTag?.[1]?.replace(/\s*\|\s*LinkedIn.*/i, ""));
+      const linkedinTitle = html.match(/<meta[^>]+name=["']title["'][^>]+content=["']([^"']+)["'][^>]*>/i);
+      
+      name = clean(ogTitle?.[1] || linkedinTitle?.[1] || titleTag?.[1]?.replace(/\s*\|\s*LinkedIn.*/i, ""));
 
-      // headline (meta description / or prominent h2)
+      // Headline extraction
       const ogDesc = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["'][^>]*>/i);
-      headline = clean(ogDesc?.[1]);
+      const linkedinDesc = html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["'][^>]*>/i);
+      headline = clean(ogDesc?.[1] || linkedinDesc?.[1]);
 
-      // about (look for "About" section text snippets)
-      const aboutMatch = html.match(/About<\/span>[\s\S]{0,2000}?<p[^>]*>([\s\S]*?)<\/p>/i) ||
-                         html.match(/Sobre<\/span>[\s\S]{0,2000}?<p[^>]*>([\s\S]*?)<\/p>/i);
-      about = clean(aboutMatch?.[1]?.replace(/<[^>]+>/g, " "));
+      // About section - enhanced extraction
+      const aboutPatterns = [
+        /About<\/span>[\s\S]{0,2000}?<p[^>]*>([\s\S]*?)<\/p>/i,
+        /Sobre<\/span>[\s\S]{0,2000}?<p[^>]*>([\s\S]*?)<\/p>/i,
+        /<section[^>]*class="[^"]*about[^"]*"[^>]*>([\s\S]*?)<\/section>/i,
+        /<div[^>]*class="[^"]*about[^"]*"[^>]*>([\s\S]*?)<\/div>/i
+      ];
+      
+      for (const pattern of aboutPatterns) {
+        const match = html.match(pattern);
+        if (match) {
+          about = clean(match[1]?.replace(/<[^>]+>/g, " "));
+          break;
+        }
+      }
 
-      // experiences (very rough extraction)
-      const expBlocks = html.match(/Experience[\s\S]{0,5000}?<section[\s\S]*?<\/section>/i) ||
-                        html.match(/Experiência[\s\S]{0,5000}?<section[\s\S]*?<\/section>/i);
-      if (expBlocks) {
-        const block = expBlocks[0];
-        const items = block.split(/<li[\s\S]*?>/i).slice(1).slice(0, 5);
-        for (const it of items) {
-          const t = clean(it.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
-          const c = clean(it.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
-          const p = clean(it.match(/(\b\d{4}\b[\s\S]{0,40}?\b\d{4}\b|\b\d+\+?\s*(mes|ano)s?)/i)?.[0]);
-          if (t || c || p) experiences.push({ title: t, company: c, period: p });
+      // Experience extraction - enhanced
+      const expPatterns = [
+        /Experience[\s\S]{0,5000}?<section[\s\S]*?<\/section>/i,
+        /Experiência[\s\S]{0,5000}?<section[\s\S]*?<\/section>/i,
+        /<section[^>]*class="[^"]*experience[^"]*"[^>]*>([\s\S]*?)<\/section>/i
+      ];
+      
+      for (const pattern of expPatterns) {
+        const expBlock = html.match(pattern);
+        if (expBlock) {
+          const block = expBlock[0];
+          const items = block.split(/<li[\s\S]*?>/i).slice(1).slice(0, 8);
+          
+          for (const item of items) {
+            const title = clean(item.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
+            const company = clean(item.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
+            const period = clean(item.match(/(\b\d{4}\b[\s\S]{0,40}?\b\d{4}\b|\b\d+\+?\s*(mes|ano)s?)/i)?.[0]);
+            const duration = clean(item.match(/(\d+\+?\s*(mes|ano)s?)/i)?.[0]);
+            
+            if (title || company || period) {
+              experiences.push({ title, company, period, duration });
+            }
+          }
+          break;
+        }
+      }
+
+      // Education extraction
+      const eduPatterns = [
+        /Education[\s\S]{0,3000}?<section[\s\S]*?<\/section>/i,
+        /Educação[\s\S]{0,3000}?<section[\s\S]*?<\/section>/i,
+        /<section[^>]*class="[^"]*education[^"]*"[^>]*>([\s\S]*?)<\/section>/i
+      ];
+      
+      for (const pattern of eduPatterns) {
+        const eduBlock = html.match(pattern);
+        if (eduBlock) {
+          const block = eduBlock[0];
+          const items = block.split(/<li[\s\S]*?>/i).slice(1).slice(0, 5);
+          
+          for (const item of items) {
+            const institution = clean(item.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
+            const degree = clean(item.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
+            const field = clean(item.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
+            const period = clean(item.match(/(\b\d{4}\b[\s\S]{0,40}?\b\d{4}\b)/i)?.[0]);
+            
+            if (institution || degree || field) {
+              education.push({ institution, degree, field, period });
+            }
+          }
+          break;
+        }
+      }
+
+      // Skills extraction
+      const skillPatterns = [
+        /Skills[\s\S]{0,3000}?<section[\s\S]*?<\/section>/i,
+        /Habilidades[\s\S]{0,3000}?<section[\s\S]*?<\/section>/i,
+        /<section[^>]*class="[^"]*skills[^"]*"[^>]*>([\s\S]*?)<\/section>/i
+      ];
+      
+      for (const pattern of skillPatterns) {
+        const skillBlock = html.match(pattern);
+        if (skillBlock) {
+          const block = skillBlock[0];
+          const skillItems = block.match(/<span[^>]*>\s*([^<]{2,50})<\/span>/gi);
+          
+          if (skillItems) {
+            for (const skillItem of skillItems.slice(0, 20)) {
+              const skillName = clean(skillItem.replace(/<[^>]+>/g, ""));
+              if (skillName && skillName.length > 2) {
+                skills.push({ name: skillName, endorsements: 0 });
+              }
+            }
+          }
+          break;
         }
       }
     }
 
     const inferredSeniority = inferSeniorityFromHeadline(headline);
+    const { score, strengths, weaknesses } = calculateLinkedInScore({
+      name, headline, about, experiences, education, skills, fetched
+    });
+    const recommendations = generateLinkedInRecommendations(strengths, weaknesses, score);
 
-    const assessmentParts: string[] = [];
-    if (name) assessmentParts.push(`Perfil de ${name}`);
-    if (inferredSeniority) assessmentParts.push(`senioridade sugerida: ${inferredSeniority}`);
-    if ((experiences?.length || 0) > 0) assessmentParts.push(`${experiences.length} experiências listadas (amostra)`);
-    if (headline) assessmentParts.push(`headline: ${headline}`);
-    if (!assessmentParts.length) assessmentParts.push("Informações públicas limitadas (LinkedIn pode bloquear scraping anônimo). Forneça mais detalhes manualmente se possível.");
+    // Generate comprehensive assessment
+    const assessment = `${name ? `Perfil de ${name}` : 'Perfil LinkedIn'} - Score: ${score}/100
 
-    // Heurísticas de avaliação (0-100)
-    const strengths: string[] = [];
-    const weaknesses: string[] = [];
+${inferredSeniority ? `Senioridade sugerida: ${inferredSeniority}` : 'Senioridade não detectada'}
 
-    let score = 50; // base
-    if (name) { score += 10; strengths.push("Nome presente"); } else { weaknesses.push("Nome não identificado"); }
-    if (headline && headline.length > 20) { score += 15; strengths.push("Headline clara e descritiva"); } else { weaknesses.push("Headline curta ou ausente"); }
-    if (inferredSeniority) { score += 10; strengths.push(`Sinal de senioridade: ${inferredSeniority}`); }
-    const aboutLen = (about?.length || 0);
-    if (aboutLen > 200) { score += 10; strengths.push("Resumo (About) detalhado"); }
-    else if (aboutLen > 80) { score += 5; strengths.push("Resumo (About) presente"); }
-    else { weaknesses.push("Resumo (About) ausente ou muito curto"); }
-    const expCount = experiences.length;
-    if (expCount >= 3) { score += 10; strengths.push("Experiências listadas (3+)"); }
-    else if (expCount >= 1) { score += 5; strengths.push("Ao menos 1 experiência listada"); }
-    else { weaknesses.push("Experiências não detectadas na página pública"); }
+${strengths.length > 0 ? `Pontos Fortes: ${strengths.join(", ")}` : "Sem pontos fortes identificados"}
 
-    if (!fetched) {
-      // Penaliza se não conseguiu obter HTML (provável bloqueio)
-      score -= 5;
-      weaknesses.push("Conteúdo público indisponível (bloqueio/privado)");
-    }
-    score = Math.max(0, Math.min(100, score));
+${weaknesses.length > 0 ? `Áreas de Melhoria: ${weaknesses.join(", ")}` : "Sem áreas de melhoria identificadas"}
 
-    const assessment = [
-      ...assessmentParts,
-      `\nPontos fortes: ${strengths.join(", ") || "-"}.`,
-      `Pontos fracos: ${weaknesses.join(", ") || "-"}.`,
-      `Nota final: ${score}/100.`,
-    ].join(" ");
+Estatísticas: ${experiences.length} experiências, ${education.length} formações, ${skills.length} habilidades
+${headline ? `Headline: ${headline}` : 'Headline não detectada'}
+${about ? `Resumo: ${about.substring(0, 100)}${about.length > 100 ? '...' : ''}` : 'Resumo não detectado'}
+
+${recommendations.length > 0 ? `Recomendações: ${recommendations.join("; ")}` : ""}`;
 
     return {
       profileUrl,
@@ -152,12 +419,19 @@ const createLinkedInEvalTool = (env: Env) => createTool({
       headline,
       about,
       experiences,
+      education,
+      skills,
       inferredSeniority,
       strengths,
       weaknesses,
       score,
       assessment,
-      meta: { fetched, status },
+      recommendations,
+      meta: { 
+        fetched, 
+        status, 
+        parsingQuality 
+      },
     };
   },
 });
