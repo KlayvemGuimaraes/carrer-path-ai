@@ -53,6 +53,12 @@ Uma plataforma moderna para avaliação de perfis profissionais, recomendações
 ### **Links de Acesso**
 - **URL Principal**: https://carrerpath-app-2024.deco.page
 
+## Demonstração / Pitch em Vídeo
+
+Confira abaixo a demonstração em vídeo:
+
+[Assista ao Pitch (YouTube)](https://www.youtube.com/watch?v=48kyhFBlaFQ)
+
 ### **Funcionalidades Disponíveis**
 - ✅ Análise de perfis GitHub
 - ✅ Recomendações de certificações
@@ -61,29 +67,6 @@ Uma plataforma moderna para avaliação de perfis profissionais, recomendações
 - ✅ Geração de PDFs
 - ✅ Integração com IA
 - ✅ Interface responsiva
-
----
-
-## 🚀 **Como Usar**
-
-### **Análise de Perfis GitHub**
-1. Insira uma URL do GitHub
-2. Clique em "Avaliar"
-3. Visualize score, pontos fortes/fracos e recomendações
-
-### **Recomendações de Certificações**
-1. Preencha o formulário com seus dados
-2. Receba recomendações personalizadas
-3. Exporte seu plano de estudo em PDF
-4. Use a IA para explicações adicionais
-
-### **Profile Cards Compartilháveis**
-1. Acesse a seção "Profile Cards"
-2. Crie um novo card com suas informações
-3. Adicione skills e escolha um tema
-4. Faça upload de uma imagem
-5. Compartilhe o link público
-6. Gere um PDF do card
 
 ---
 
