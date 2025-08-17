@@ -256,43 +256,6 @@ npm run test         # Executa testes (se configurados)
 5. **Profile Cards**: Teste a criação e gerenciamento de cards
 6. **IA Integration**: Teste a funcionalidade de explicações com IA
 
-### **🚨 Troubleshooting Comum**
-
-#### **Erro: "Port already in use"**
-```bash
-# Verifique se as portas estão livres
-lsof -i :4000  # Frontend
-lsof -i :8787  # Servidor MCP
-
-# Mate processos se necessário
-kill -9 <PID>
-```
-
-#### **Erro: "Module not found"**
-```bash
-# Reinstale dependências
-rm -rf node_modules package-lock.json
-npm install
-
-# No diretório view também
-cd view
-rm -rf node_modules package-lock.json
-npm install
-```
-
-#### **Erro: "Cloudflare Workers"**
-```bash
-# Verifique se o Wrangler está configurado
-npm install -g wrangler
-wrangler login
-```
-
-#### **Erro: "Database migration"**
-```bash
-# Gere as migrações do banco
-npm run db:generate
-```
-
 ---
 
 ## 🎯 **Futuras implmentações**
