@@ -93141,12 +93141,27 @@ Pergunta do usu\xE1rio: ${question}
 Contexto:
 ${context4}
       `.trim();
-    const resp = await env3.DECO_CHAT_WORKSPACE_API.AI_GENERATE({
-      messages: [{ role: "user", content: prompt }],
-      maxTokens: 400,
-      temperature: 0.3
-    });
-    return Response.json({ answer: resp.text });
+    try {
+      const resp = await env3.DECO_CHAT_WORKSPACE_API.AI_GENERATE({
+        messages: [{ role: "user", content: prompt }],
+        maxTokens: 400,
+        temperature: 0.3
+      });
+      return Response.json({ answer: resp.text, meta: { ai: "ok" } });
+    } catch (aiErr) {
+      const msg = aiErr instanceof Error ? aiErr.message : String(aiErr);
+      const reference = msg.match(/reference\s*=\s*([\w-]+)/)?.[1] || void 0;
+      const summary = [
+        "Resumo das recomenda\xE7\xF5es (fallback local):",
+        ...rec.items.slice(0, 3).map((it, i) => `${i + 1}. ${it.certification.name} \u2014 ${it.reasons.join("; ")}`),
+        "Sugest\xE3o de ordem: 1 \u2192 2 \u2192 3",
+        question ? `Pergunta: ${question} (resposta detalhada requer IA)` : ""
+      ].filter(Boolean).join("\n");
+      return Response.json({
+        answer: summary,
+        meta: { ai: "unavailable", reference }
+      });
+    }
   } catch (error3) {
     const message = error3 instanceof Error ? error3.message : "An unknown error occurred";
     return new Response(JSON.stringify({ error: message }), { status: 400, headers: { "Content-Type": "application/json" } });

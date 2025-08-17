@@ -9,7 +9,7 @@ import { type Env as DecoEnv, StateSchema } from "./deco.gen.ts";
 import { tools } from "./tools/index.ts";
 import { workflows } from "./workflows.ts";
 import { RecommendationResponseSchema, UserProfileSchema } from "./schemas.ts";
-import createCertRecommendTool from "./tools/certRecommend.ts";
+import { runCertRecommend } from "./tools/certRecommend.ts";
 
 /**
  * This Env type is the main context object that is passed to
@@ -36,9 +36,8 @@ async function handleRecommend(request: Request, env: Env): Promise<Response> {
     const rawProfile = (body && body.profile) ? body.profile : body;
     const profile = UserProfileSchema.parse(rawProfile);
 
-    // Usa a Tool MCP tipada para gerar recomendações
-    const recommendTool = createCertRecommendTool(env);
-    const result = await (recommendTool as any).execute({ context: profile });
+    // Executa via helper tipado da Tool (sem cast no call site)
+    const result = await runCertRecommend(env, profile);
     return Response.json(result);
   } catch (error) {
     // Provide clearer validation feedback
@@ -94,13 +93,31 @@ Contexto:
 ${context}
       `.trim();
 
-    const resp = await env.DECO_CHAT_WORKSPACE_API.AI_GENERATE({
-      messages: [{ role: "user", content: prompt }],
-      maxTokens: 400,
-      temperature: 0.3,
-    });
+    try {
+      const resp = await env.DECO_CHAT_WORKSPACE_API.AI_GENERATE({
+        messages: [{ role: "user", content: prompt }],
+        maxTokens: 400,
+        temperature: 0.3,
+      });
+      return Response.json({ answer: resp.text, meta: { ai: "ok" } });
+    } catch (aiErr) {
+      // Extrai possível reference do erro para facilitar suporte
+      const msg = aiErr instanceof Error ? aiErr.message : String(aiErr);
+      const reference = (msg.match(/reference\s*=\s*([\w-]+)/)?.[1]) || undefined;
 
-    return Response.json({ answer: resp.text });
+      // Fallback determinístico: sumariza recomendações sem IA
+      const summary = [
+        "Resumo das recomendações (fallback local):",
+        ...rec.items.slice(0, 3).map((it, i) => `${i + 1}. ${it.certification.name} — ${it.reasons.join("; ")}`),
+        "Sugestão de ordem: 1 → 2 → 3",
+        question ? `Pergunta: ${question} (resposta detalhada requer IA)` : "",
+      ].filter(Boolean).join("\n");
+
+      return Response.json({
+        answer: summary,
+        meta: { ai: "unavailable", reference },
+      });
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : "An unknown error occurred";
     return new Response(JSON.stringify({ error: message }), { status: 400, headers: { "Content-Type": "application/json" } });

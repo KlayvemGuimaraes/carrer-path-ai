@@ -63,7 +63,7 @@ export default function App() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-white">CareerAI — Recomendações de Certificações</h1>
+      <h1 className="text-2xl font-semibold text-white">CarrerPath — Recomendações de Certificações</h1>
 
       <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="col-span-1">

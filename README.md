@@ -1,11 +1,7 @@
-# Deco MCP app
+# CarrerPath — Recomendações de Certificações (MCP + View Agêntica)
 
-A full-stack template for building
-[Model Context Protocol (MCP)](https://spec.modelcontextprotocol.io/) servers
-with a modern React frontend. This template provides a complete development
-environment where your MCP server not only exposes tools and workflows to AI
-agents but also serves a beautiful web interface built with React and Tailwind
-CSS.
+Mini‑app full‑stack usando MCP tipado (Deco + Cloudflare Workers) e React/Vite.
+Entrega voltada ao Lab Prático (15/08, 10h–16h BRT) e ao Badge de Expert.
 
 ## ✨ Features
 
@@ -20,6 +16,21 @@ CSS.
 - **🚀 Hot Reload**: Live development with automatic rebuilding for both
   frontend and backend
 - **☁️ Ready to Deploy**: One-command deployment to Cloudflare Workers
+
+## 🎯 Objetivo do Lab
+
+- Construir, publicar e demonstrar um mini‑app com dados públicos ou tema livre.
+- Entrega “fim‑a‑fim”: input do usuário → MCP tipado → View → funcionalidade agêntica.
+- Vídeo curto (≤ 90s), README claro, repo limpo.
+
+Este projeto escolhe a opção B (Tema Livre): recomendações de certificações.
+
+Checklist (Sim/Não):
+- __Funcionalidade fim‑a‑fim__: Sim
+- __Integração tipada (MCP)__: Sim (Tool `CERT_RECOMMEND`)
+- __Views operáveis (UI/UX)__: Sim
+- __Funcionalidade agêntica__: Sim, com fallback local quando IA indisponível
+- __Qualidade da entrega__: Sim (README, setup, vídeo pendente)
 
 ## 🚀 Quick Start
 
@@ -41,8 +52,7 @@ npm run configure
 npm run dev
 ```
 
-The server will start on `http://localhost:8787` serving both your MCP endpoints
-and the React frontend.
+O servidor sobe em `http://localhost:8787` (API/MCP) e o front em `http://localhost:4000`.
 
 ## 📁 Project Structure
 
@@ -65,7 +75,7 @@ and the React frontend.
 - **`npm run gen:self`** - Generate types for your own tools/workflows
 - **`npm run deploy`** - Deploy to production
 
-## 🧪 Project — CareerAI (This Repo)
+## 🧪 Project — CarrerPath (This Repo)
 
 ### How to Run Locally
 
@@ -89,29 +99,74 @@ taskkill /PID <PID> /F
 
 ### Endpoints
 
-- `POST /api/recommend` — Recomendação de certificações via Tool MCP tipada
-  - input: `UserProfile` (vide `server/schemas.ts`)
-  - output: `{ items: RecommendationItem[] }`
-- `POST /api/ai/explain` — Explicação por IA (usa `DECO_CHAT_WORKSPACE_API`)
+- `POST /api/recommend` — recomendações via Tool MCP tipada (`CERT_RECOMMEND`)
+  - Input: `UserProfile` (`role`, `seniority`, `targetArea?`, `goals[]`, `budgetUSD?`)
+  - Output: `{ items: { certification, score, reasons }[] }`
+- `POST /api/ai/explain` — explicação por IA (usa `DECO_CHAT_WORKSPACE_API`)
+  - Se a IA falhar (créditos/permissionamento), retornamos fallback determinístico
+    com `meta: { ai: "unavailable", reference }`.
 
 ### Architecture
 
-- Server
-  - `server/main.ts` — Router (`/api/recommend`, `/api/ai/explain`)
-  - `server/tools/certRecommend.ts` — Tool MCP (id: `CERT_RECOMMEND`)
-  - `server/util/catalog.ts` — Catálogo estático validado via Zod
-  - `server/schemas.ts` — Schemas Zod (tipagem end‑to‑end)
-- Frontend
-  - `view/src/App.tsx` — Form, lista de recomendações e ação “Explicar com IA”
-  - `view/public/manifest.json` — Manifest para limpar aviso no console
+- __Server__
+  - `server/main.ts` — Router (`/api/recommend`, `/api/ai/explain`) e fallback de IA
+  - `server/tools/certRecommend.ts` — Tool MCP `CERT_RECOMMEND` (tipada)
+    - helper tipado `runCertRecommend(env, profile)` (evita casts)
+    - logs estruturados: `[CERT_RECOMMEND] role=... area=... top=... ms=...`
+  - `server/util/catalog.ts` — carregamento/validação do catálogo
+  - `server/util/scoring.ts` — função `scoreCertification()` (pesos abaixo)
+  - `server/schemas.ts` — Schemas Zod (tipagem de ponta a ponta)
+- __Frontend__
+  - `view/src/App.tsx` — formulário, top recomendações, botão “Explicar com IA”
+  - Proxy Vite → `/api/*`
 
-### Checklist (Sim/Não)
+## 🔎 MCP — Como foi aplicado
 
-- Funcionalidade fim‑a‑fim: Sim (form → `/api/recommend` → render)
-- Integração tipada (MCP): Sim (Tool `CERT_RECOMMEND` no endpoint)
-- Views operáveis (UI/UX): Sim (inputs, loading, erros)
-- Funcionalidade agêntica: Parcial (depende de créditos para IA)
-- Qualidade da entrega: Parcial (este README + manifest; vídeo ≤ 90s pendente)
+- Tool MCP tipada `CERT_RECOMMEND` (input: `UserProfile`, output: `RecommendationResponse`).
+- O endpoint `/api/recommend` chama a Tool via helper `runCertRecommend()`.
+- Workflows estão registrados em `server/workflows.ts` (demonstração do padrão `createStepFromTool`).
+
+## 🧠 Scoring (regras atuais)
+
+- __Área‑alvo__: +40
+- __Cargo__: +35
+- __Metas (`goals`)__: até +25 (5 pontos por match, máx 5)
+- __Senioridade__: +20 iniciante/júnior, +15 pleno, +20 avançado/sênior
+- __Orçamento__: +5 (dentro) / −5 (acima)
+
+Motivos retornados em `reasons` são exibidos na UI.
+
+## 📚 Catálogo
+
+Arquivo: `server/data/certifications.json`. Cobre Cloud (AWS/Azure/GCP), Segurança
+(Security+/PenTest+/CISSP/CEH/AZ‑500), Redes (CCNA/Network+), Dev/DevOps (CKA/Terraform),
+Gestão (CAPM/PSM I), Dados/BI/ML (PL‑300/DP‑203/GCP PDE/AWS DA Specialty/AWS ML Specialty/AI‑102/TF Dev).
+
+## 🧪 Testar localmente (fluxo)
+
+1) `npm --prefix server run dev` (http://localhost:8787)
+2) `npm --prefix view run dev` (http://localhost:4000)
+3) Preencha o formulário, clique “Recomendar”.
+4) Clique “Explicar recomendações com IA”.
+   - Se IA indisponível, verá resposta de fallback e `meta.ai = "unavailable"`.
+
+## 🚀 Deploy
+
+- Cloudflare Workers via Wrangler (backend) e Vite (frontend).
+- Scripts:
+  - `npm run deploy` (template base)
+  - ou pipelines CI/CD conforme seu fork.
+
+## 🎥 Vídeo (≤ 90s)
+
+- Mostre: preenchimento do formulário → recomendações → explicação com IA/fallback → valor pro usuário.
+- Sugestão de roteiro: 20s app, 20s MCP, 20s scoring, 20s IA/fallback e call‑to‑action.
+
+## 📦 Entrega (para o formulário)
+
+- Link do app (deco.page/… ou URL do seu deploy)
+- Link do repositório (este)
+- Link do vídeo curto (≤ 90s)
 
 ## 🔗 Frontend ↔ Server Communication
 
