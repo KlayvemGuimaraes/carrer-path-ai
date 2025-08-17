@@ -252,27 +252,105 @@ const createLinkedInEvalTool = (env: Env) => createTool({
     let fetched = false;
     let status: number | undefined = undefined;
     let parsingQuality = "unknown";
+    let debugInfo = "";
     
+    // Strategy 1: Try with enhanced headers
     try {
+      console.log(`[LinkedInEval] Attempting to fetch: ${profileUrl}`);
       const res = await fetch(profileUrl, {
         headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.5",
-          "Accept-Encoding": "gzip, deflate",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7",
+          "Accept-Encoding": "gzip, deflate, br",
           "DNT": "1",
           "Connection": "keep-alive",
           "Upgrade-Insecure-Requests": "1",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "none",
+          "Cache-Control": "max-age=0",
         },
       });
+      
       status = res.status;
+      debugInfo += `Strategy 1 - Status: ${status}, Headers: ${JSON.stringify(Object.fromEntries(res.headers.entries()))}`;
+      
       if (res.ok) {
         html = await res.text();
         fetched = true;
+        console.log(`[LinkedInEval] Strategy 1 successful. Status: ${status}, HTML length: ${html.length}`);
         parsingQuality = "full";
+      } else {
+        console.log(`[LinkedInEval] Strategy 1 failed. Status: ${status}`);
       }
-    } catch {
-      // Network error, will use fallback
+    } catch (error: any) {
+      console.error(`[LinkedInEval] Strategy 1 network error: ${error.message}`);
+      debugInfo += `Strategy 1 - Error: ${error.message}`;
+    }
+
+    // Strategy 2: Try with different User-Agent if first failed
+    if (!fetched) {
+      try {
+        console.log(`[LinkedInEval] Trying Strategy 2 with different User-Agent`);
+        const res2 = await fetch(profileUrl, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "keep-alive",
+          },
+        });
+        
+        status = res2.status;
+        debugInfo += ` | Strategy 2 - Status: ${status}`;
+        
+        if (res2.ok) {
+          html = await res2.text();
+          fetched = true;
+          console.log(`[LinkedInEval] Strategy 2 successful. Status: ${status}, HTML length: ${html.length}`);
+          parsingQuality = "full";
+        } else {
+          console.log(`[LinkedInEval] Strategy 2 failed. Status: ${status}`);
+        }
+      } catch (error: any) {
+        console.error(`[LinkedInEval] Strategy 2 network error: ${error.message}`);
+        debugInfo += ` | Strategy 2 - Error: ${error.message}`;
+      }
+    }
+
+    // Strategy 3: Try with minimal headers if both failed
+    if (!fetched) {
+      try {
+        console.log(`[LinkedInEval] Trying Strategy 3 with minimal headers`);
+        const res3 = await fetch(profileUrl, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          },
+        });
+        
+        status = res3.status;
+        debugInfo += ` | Strategy 3 - Status: ${status}`;
+        
+        if (res3.ok) {
+          html = await res3.text();
+          fetched = true;
+          console.log(`[LinkedInEval] Strategy 3 successful. Status: ${status}, HTML length: ${html.length}`);
+          parsingQuality = "full";
+        } else {
+          console.log(`[LinkedInEval] Strategy 3 failed. Status: ${status}`);
+        }
+      } catch (error: any) {
+        console.error(`[LinkedInEval] Strategy 3 network error: ${error.message}`);
+        debugInfo += ` | Strategy 3 - Error: ${error.message}`;
+      }
+    }
+
+    // Final debug info
+    if (!fetched) {
+      console.log(`[LinkedInEval] All strategies failed. Debug info: ${debugInfo}`);
+      parsingQuality = "all_strategies_failed";
     }
 
     // Enhanced parsing with multiple strategies
@@ -296,97 +374,115 @@ const createLinkedInEvalTool = (env: Env) => createTool({
       const linkedinDesc = html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["'][^>]*>/i);
       headline = clean(ogDesc?.[1] || linkedinDesc?.[1]);
 
-      // About section - enhanced extraction
+      // About section - re-enhanced extraction with more generic patterns
       const aboutPatterns = [
-        /About<\/span>[\s\S]{0,2000}?<p[^>]*>([\s\S]*?)<\/p>/i,
-        /Sobre<\/span>[\s\S]{0,2000}?<p[^>]*>([\s\S]*?)<\/p>/i,
-        /<section[^>]*class="[^"]*about[^"]*"[^>]*>([\s\S]*?)<\/section>/i,
-        /<div[^>]*class="[^"]*about[^"]*"[^>]*>([\s\S]*?)<\/div>/i
+        /aria-label="About"[\s\S]{0,5000}?<p[^>]*>([\s\S]*?)<\/p>/i, // Tentar atributos aria
+        /data-test-id="about-section"[\s\S]{0,5000}?<p[^>]*>([\s\S]*?)<\/p>/i, // Tentar atributos data-
+        /<section[^>]*>(?:<h2[^>]*>(?:About|Sobre)<\/h2>)([\s\S]*?)<\/section>/i, // Buscar título H2 e depois conteúdo
+        /<div[^>]*>(?:<h2[^>]*>(?:About|Sobre)<\/h2>)([\s\S]*?)<\/div>/i, // Buscar título H2 e depois conteúdo
+        /About(?:<\/span>)?([\s\S]{0,2000}?)<\/p>/i, // Mais simples, focado no texto "About" e fechamento de parágrafo
+        /Sobre(?:<\/span>)?([\s\S]{0,2000}?)<\/p>/i, // Mais simples, focado no texto "Sobre" e fechamento de parágrafo
       ];
       
       for (const pattern of aboutPatterns) {
         const match = html.match(pattern);
         if (match) {
-          about = clean(match[1]?.replace(/<[^>]+>/g, " "));
+          about = clean(match[1]?.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\"").replace(/&#039;/g, "\'")); // Limpar HTML e entidades
           break;
         }
       }
+      if (about) {
+        parsingQuality = parsingQuality === "full" ? "good" : "partial"; // Atualizar qualidade de parsing
+      }
 
-      // Experience extraction - enhanced
+      // Experience extraction - more robust
       const expPatterns = [
-        /Experience[\s\S]{0,5000}?<section[\s\S]*?<\/section>/i,
-        /Experiência[\s\S]{0,5000}?<section[\s\S]*?<\/section>/i,
-        /<section[^>]*class="[^"]*experience[^"]*"[^>]*>([\s\S]*?)<\/section>/i
+        /<section[^>]*aria-label="Experience"[^>]*>([\s\S]*?)<\/section>/i, // Tentar atributos aria-label
+        /<section[^>]*data-test-id="experience-section"[^>]*>([\s\S]*?)<\/section>/i, // Tentar atributos data-test-id
+        /Experience(?:<\/span>)?([\s\S]{0,10000}?)<\/section>/i, // Fallback para seções com título "Experience"
+        /Experiência(?:<\/span>)?([\s\S]{0,10000}?)<\/section>/i, // Fallback para seções com título "Experiência"
       ];
       
       for (const pattern of expPatterns) {
-        const expBlock = html.match(pattern);
-        if (expBlock) {
-          const block = expBlock[0];
-          const items = block.split(/<li[\s\S]*?>/i).slice(1).slice(0, 8);
+        const expBlockMatch = html.match(pattern);
+        if (expBlockMatch) {
+          const block = expBlockMatch[1] || expBlockMatch[0]; // Capturar grupo ou bloco inteiro
           
-          for (const item of items) {
-            const title = clean(item.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
-            const company = clean(item.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
-            const period = clean(item.match(/(\b\d{4}\b[\s\S]{0,40}?\b\d{4}\b|\b\d+\+?\s*(mes|ano)s?)/i)?.[0]);
-            const duration = clean(item.match(/(\d+\+?\s*(mes|ano)s?)/i)?.[0]);
+          // Tentar dividir por itens de experiência mais genéricos
+          const items = block.split(/<li[^>]*>([\s\S]*?)<\/li>/i).slice(1); // Dividir por <li>
+          
+          for (const item of items.slice(0, 10)) { // Limitar a 10 experiências
+            const title = clean(item.match(/(?:<h3[^>]*>|<div[^>]*>|<span[^>]*>)([\s\S]{2,150}?)(?:<\/h3>|<\/div>|<\/span>)/i)?.[1]); // Título: h3, div ou span
+            const company = clean(item.match(/(?:<a[^>]*>|<div[^>]*>|<span[^>]*>)([\s\S]{2,150}?)(?:<\/a>|<\/div>|<\/span>)/i)?.[1]); // Empresa: a, div ou span
+            const periodMatch = item.match(/(\b\d{4}\b[\s\S]{0,80}?\b\d{4}\b|\b\d{4}\b[\s\S]{0,80}?(?:Atual|Presente)|\d+\s*(?:ano|mês)s?)/i); // Período: ex: 2020 - 2023, 2 anos, 6 meses
+            const period = clean(periodMatch?.[0]);
             
             if (title || company || period) {
-              experiences.push({ title, company, period, duration });
+              experiences.push({ title, company, period });
             }
           }
+          parsingQuality = parsingQuality === "full" ? "good" : "partial"; // Atualizar qualidade
           break;
         }
       }
 
-      // Education extraction
+      // Education extraction - more robust
       const eduPatterns = [
-        /Education[\s\S]{0,3000}?<section[\s\S]*?<\/section>/i,
-        /Educação[\s\S]{0,3000}?<section[\s\S]*?<\/section>/i,
-        /<section[^>]*class="[^"]*education[^"]*"[^>]*>([\s\S]*?)<\/section>/i
+        /<section[^>]*aria-label="Education"[^>]*>([\s\S]*?)<\/section>/i, // Tentar atributos aria-label
+        /<section[^>]*data-test-id="education-section"[^>]*>([\s\S]*?)<\/section>/i, // Tentar atributos data-test-id
+        /Education(?:<\/span>)?([\s\S]{0,5000}?)<\/section>/i, // Fallback para seções com título "Education"
+        /Educação(?:<\/span>)?([\s\S]{0,5000}?)<\/section>/i, // Fallback para seções com título "Educação"
       ];
       
       for (const pattern of eduPatterns) {
-        const eduBlock = html.match(pattern);
-        if (eduBlock) {
-          const block = eduBlock[0];
-          const items = block.split(/<li[\s\S]*?>/i).slice(1).slice(0, 5);
+        const eduBlockMatch = html.match(pattern);
+        if (eduBlockMatch) {
+          const block = eduBlockMatch[1] || eduBlockMatch[0];
+          const items = block.split(/<li[^>]*>([\s\S]*?)<\/li>/i).slice(1);
           
-          for (const item of items) {
-            const institution = clean(item.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
-            const degree = clean(item.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
-            const field = clean(item.match(/<span[^>]*>\s*([^<]{2,100})<\/span>/i)?.[1]);
-            const period = clean(item.match(/(\b\d{4}\b[\s\S]{0,40}?\b\d{4}\b)/i)?.[0]);
+          for (const item of items.slice(0, 5)) { // Limitar a 5 educações
+            const institution = clean(item.match(/(?:<h3[^>]*>|<div[^>]*>|<span[^>]*>)([\s\S]{2,150}?)(?:<\/h3>|<\/div>|<\/span>)/i)?.[1]);
+            const degree = clean(item.match(/(?:<h4[^>]*>|<div[^>]*>|<span[^>]*>)([\s\S]{2,150}?)(?:<\/h4>|<\/div>|<\/span>)/i)?.[1]);
+            const field = clean(item.match(/(?:<div[^>]*class="[^"]*field-of-study[^"]*"[^>]*>|<span[^>]*>)([\s\S]{2,150}?)(?:<\/div>|<\/span>)/i)?.[1]);
+            const period = clean(item.match(/(\b\d{4}\b[\s\S]{0,40}?\b\d{4}\b|\b\d{4}\b[\s\S]{0,40}?(?:Atual|Presente))/i)?.[0]);
             
             if (institution || degree || field) {
               education.push({ institution, degree, field, period });
             }
           }
+          parsingQuality = parsingQuality === "full" ? "good" : "partial";
           break;
         }
       }
 
-      // Skills extraction
+      // Skills extraction - more robust
       const skillPatterns = [
-        /Skills[\s\S]{0,3000}?<section[\s\S]*?<\/section>/i,
-        /Habilidades[\s\S]{0,3000}?<section[\s\S]*?<\/section>/i,
-        /<section[^>]*class="[^"]*skills[^"]*"[^>]*>([\s\S]*?)<\/section>/i
+        /<section[^>]*aria-label="Skills"[^>]*>([\s\S]*?)<\/section>/i, // Tentar atributos aria-label
+        /<section[^>]*data-test-id="skills-section"[^>]*>([\s\S]*?)<\/section>/i, // Tentar atributos data-test-id
+        /Skills(?:<\/span>)?([\s\S]{0,5000}?)<\/section>/i, // Fallback para seções com título "Skills"
+        /Habilidades(?:<\/span>)?([\s\S]{0,5000}?)<\/section>/i, // Fallback para seções com título "Habilidades"
       ];
       
       for (const pattern of skillPatterns) {
-        const skillBlock = html.match(pattern);
-        if (skillBlock) {
-          const block = skillBlock[0];
-          const skillItems = block.match(/<span[^>]*>\s*([^<]{2,50})<\/span>/gi);
+        const skillBlockMatch = html.match(pattern);
+        if (skillBlockMatch) {
+          const block = skillBlockMatch[1] || skillBlockMatch[0];
+          // Tentar extrair habilidades de <span> ou <div> com classes de habilidade
+          const skillItems = block.match(/(?:<span[^>]*>|<div[^>]*class="[^"]*skill-name[^"]*"[^>]*>)([\s\S]{2,100}?)(?:<\/span>|<\/div>)/gi);
           
           if (skillItems) {
-            for (const skillItem of skillItems.slice(0, 20)) {
+            for (const skillItem of skillItems.slice(0, 20)) { // Limitar a 20 habilidades
               const skillName = clean(skillItem.replace(/<[^>]+>/g, ""));
+              // Tentar extrair endossos (se houver um padrão)
+              const endorsementMatch = skillItem.match(/\b(\d+)\s*endorsement/i); // Ex: 10 endorsements
+              const endorsements = endorsementMatch ? parseInt(endorsementMatch[1]) : 0;
+
               if (skillName && skillName.length > 2) {
-                skills.push({ name: skillName, endorsements: 0 });
+                skills.push({ name: skillName, endorsements });
               }
             }
           }
+          parsingQuality = parsingQuality === "full" ? "good" : "partial";
           break;
         }
       }
@@ -397,6 +493,27 @@ const createLinkedInEvalTool = (env: Env) => createTool({
       name, headline, about, experiences, education, skills, fetched
     });
     const recommendations = generateLinkedInRecommendations(strengths, weaknesses, score);
+
+    // Add specific feedback for scraping failures
+    if (parsingQuality === "all_strategies_failed") {
+      weaknesses.push("LinkedIn bloqueou o acesso automatizado ao perfil");
+      weaknesses.push("O perfil pode estar configurado como privado ou ter restrições de acesso");
+      
+      recommendations.unshift("LinkedIn implementou medidas anti-bot rigorosas que impedem a análise automatizada");
+      recommendations.unshift("Considere usar a API oficial do LinkedIn ou compartilhar informações do perfil manualmente");
+    }
+
+    // Refine parsingQuality based on content found
+    if (fetched && name && headline && about && experiences.length > 0 && education.length > 0 && skills.length > 0) {
+      parsingQuality = "good";
+    } else if (fetched) {
+      parsingQuality = "partial";
+    } else {
+      parsingQuality = "failed_fetch_no_html";
+    }
+
+    console.log(`[LinkedInEval] Parsing quality: ${parsingQuality}`);
+    console.log(`[LinkedInEval] Profile data: Name=${!!name}, Headline=${!!headline}, About=${!!about}, Experiences=${experiences.length}, Education=${education.length}, Skills=${skills.length}`);
 
     // Generate comprehensive assessment
     const assessment = `${name ? `Perfil de ${name}` : 'Perfil LinkedIn'} - Score: ${score}/100
