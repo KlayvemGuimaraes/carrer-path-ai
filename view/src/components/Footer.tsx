@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from '@tanstack/react-router';
 
 const Footer: React.FC = () => {
   return (
@@ -57,6 +58,14 @@ const Footer: React.FC = () => {
                 >
                   Explicações com IA
                 </a>
+              </li>
+              <li>
+                <Link 
+                  to="/profile-cards"
+                  className="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition-[color,transform] duration-200 ease-in-out hover:translate-x-1"
+                >
+                  Profile Cards Compartilháveis
+                </Link>
               </li>
             </ul>
           </div>

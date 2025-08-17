@@ -34,3 +34,30 @@ export const RecommendationResponseSchema = z.object({
   items: z.array(RecommendationItemSchema),
 });
 export type RecommendationResponse = z.infer<typeof RecommendationResponseSchema>;
+
+// Schema para Profile Card
+export const ProfileCardSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, "Nome é obrigatório").max(100),
+  bio: z.string().max(200, "Bio deve ter no máximo 200 caracteres"),
+  skills: z.array(z.string()).min(1, "Pelo menos uma skill é obrigatória").max(10),
+  profileImage: z.string().url().optional(),
+  theme: z.enum(["blue", "purple", "green", "orange", "pink"]).default("blue"),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+export type ProfileCard = z.infer<typeof ProfileCardSchema>;
+
+export const CreateProfileCardSchema = ProfileCardSchema.omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
+export type CreateProfileCard = z.infer<typeof CreateProfileCardSchema>;
+
+export const UpdateProfileCardSchema = ProfileCardSchema.partial().omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
+export type UpdateProfileCard = z.infer<typeof UpdateProfileCardSchema>;

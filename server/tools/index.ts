@@ -10,6 +10,13 @@ import createHelloTool from "./hello.ts";
 import createCertSearchTool from "./certSearch.ts";
 import createCertRecommendTool from "./certRecommend.ts";
 import createGitHubEvalTool from "./githubEval.ts";
+import {
+  createProfileCardTool,
+  getProfileCardTool,
+  updateProfileCardTool,
+  deleteProfileCardTool,
+  listProfileCardsTool,
+} from "./profileCard.ts";
 
 
 // The `tools` array is registered with the Deco runtime.
@@ -19,4 +26,9 @@ export const tools = [
   createCertSearchTool,
   createCertRecommendTool,
   createGitHubEvalTool,
+  createProfileCardTool,
+  getProfileCardTool,
+  updateProfileCardTool,
+  deleteProfileCardTool,
+  listProfileCardsTool,
 ];

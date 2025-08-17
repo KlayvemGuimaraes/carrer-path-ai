@@ -1,3 +1,4 @@
+#:schema node_modules/@deco/workers-runtime/config-schema.json
 name = "carrerpath-app-2024"
 main = "main.ts"
 compatibility_date = "2025-06-17"
@@ -7,6 +8,7 @@ compatibility_flags = [ "nodejs_compat" ]
 directory = "./view-build"
 binding = "ASSETS"
 
+[deco]
 [[deco.bindings]]
 name = "AI_GATEWAY"
 type = "mcp"

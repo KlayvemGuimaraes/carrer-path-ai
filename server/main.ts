@@ -80,6 +80,92 @@ async function handleEvalGitHub(request: Request, env: Env): Promise<Response> {
 
 
 /**
+ * Handles the /api/profile-cards endpoint logic.
+ */
+async function handleProfileCards(request: Request, env: Env): Promise<Response> {
+  if (request.method === "POST") {
+    // Create new profile card
+    try {
+      const body = await request.json();
+      const { createProfileCardTool } = await import("./tools/profileCard.ts");
+      const tool = createProfileCardTool(env);
+      const result = await (tool as any).execute({ context: body });
+      return Response.json(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unknown error occurred";
+      return new Response(JSON.stringify({ error: message }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+  } else if (request.method === "GET") {
+    // List profile cards
+    try {
+      const url = new URL(request.url);
+      const limit = parseInt(url.searchParams.get("limit") || "20");
+      const offset = parseInt(url.searchParams.get("offset") || "0");
+      
+      const { listProfileCardsTool } = await import("./tools/profileCard.ts");
+      const tool = listProfileCardsTool(env);
+      const result = await (tool as any).execute({ context: { limit, offset } });
+      return Response.json(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unknown error occurred";
+      return new Response(JSON.stringify({ error: message }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+  }
+  
+  return new Response("Method Not Allowed", { status: 405 });
+}
+
+/**
+ * Handles the /api/profile-cards/[id] endpoint logic.
+ */
+async function handleProfileCardById(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+  const id = url.pathname.split("/").pop();
+  
+  if (!id) {
+    return new Response("ID is required", { status: 400 });
+  }
+
+  if (request.method === "GET") {
+    // Get profile card by ID
+    try {
+      const { getProfileCardTool } = await import("./tools/profileCard.ts");
+      const tool = getProfileCardTool(env);
+      const result = await (tool as any).execute({ context: { id } });
+      return Response.json(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unknown error occurred";
+      return new Response(JSON.stringify({ error: message }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+  } else if (request.method === "PUT") {
+    // Update profile card
+    try {
+      const body = await request.json();
+      const { updateProfileCardTool } = await import("./tools/profileCard.ts");
+      const tool = updateProfileCardTool(env);
+      const result = await (tool as any).execute({ context: { id, updates: body } });
+      return Response.json(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unknown error occurred";
+      return new Response(JSON.stringify({ error: message }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+  } else if (request.method === "DELETE") {
+    // Delete profile card
+    try {
+      const { deleteProfileCardTool } = await import("./tools/profileCard.ts");
+      const tool = deleteProfileCardTool(env);
+      const result = await (tool as any).execute({ context: { id } });
+      return Response.json(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unknown error occurred";
+      return new Response(JSON.stringify({ error: message }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+  }
+  
+  return new Response("Method Not Allowed", { status: 405 });
+}
+
+/**
  * Handles the /api/ai/explain endpoint logic.
  */
 async function handleAiExplain(request: Request, env: Env): Promise<Response> {
@@ -164,6 +250,12 @@ const fetchHandler = (
   }
   if (url.pathname === "/api/eval/github") {
     return handleEvalGitHub(req, env);
+  }
+  if (url.pathname === "/api/profile-cards") {
+    return handleProfileCards(req, env);
+  }
+  if (url.pathname.startsWith("/api/profile-cards/")) {
+    return handleProfileCardById(req, env);
   }
   
 
