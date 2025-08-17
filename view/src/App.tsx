@@ -2,6 +2,7 @@ import { useState } from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import StudyPlanDoc from "./pdf/StudyPlanDoc";
 import { buildStudyPlan } from "./lib/studyPlan";
+import Footer from "./components/Footer";
 
 type RecommendationItem = {
   certification: {
@@ -72,8 +73,8 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'dark' : ''}`}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className={`min-h-screen transition-[background-color,color,border-color] duration-500 ease-in-out ${isDark ? 'dark' : ''}`}>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-[background] duration-500 ease-in-out pb-0">
         {/* Header with Theme Toggle */}
         <div className="absolute top-4 right-4 z-50">
           <button
@@ -108,9 +109,9 @@ export default function App() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
           {/* Certification Recommendations Section */}
-          <div className="glass rounded-2xl p-8 mb-8">
+          <div id="certifications" className="glass rounded-2xl p-8 mb-12">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
                 Recomendações de Certificações
@@ -128,7 +129,7 @@ export default function App() {
                     Cargo
                   </label>
                   <input
-                    className="w-full rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus-ring transition-all"
+                    className="w-full rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus-ring transition-[background-color,border-color,box-shadow] duration-200 ease-in-out"
                     value={role}
                     onChange={e => setRole(e.target.value)}
                     placeholder="ex: desenvolvedor, devops"
@@ -140,7 +141,7 @@ export default function App() {
                     Senioridade
                   </label>
                   <select
-                    className="w-full rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white focus-ring transition-all"
+                    className="w-full rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white focus-ring transition-[background-color,border-color,box-shadow] duration-200 ease-in-out"
                     value={seniority}
                     onChange={e => setSeniority(e.target.value as any)}
                   >
@@ -155,7 +156,7 @@ export default function App() {
                     Área-alvo
                   </label>
                   <select
-                    className="w-full rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white focus-ring transition-all"
+                    className="w-full rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white focus-ring transition-[background-color,border-color,box-shadow] duration-200 ease-in-out"
                     value={targetArea}
                     onChange={e => setTargetArea(e.target.value)}
                   >
@@ -173,7 +174,7 @@ export default function App() {
                     Metas (separe por vírgula)
                   </label>
                   <input
-                    className="w-full rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus-ring transition-all"
+                    className="w-full rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus-ring transition-[background-color,border-color,box-shadow] duration-200 ease-in-out"
                     value={goals}
                     onChange={e => setGoals(e.target.value)}
                     placeholder="ex: arquitetura, segurança"
@@ -186,7 +187,7 @@ export default function App() {
                   </label>
                   <input
                     type="number"
-                    className="w-full md:w-1/2 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus-ring transition-all"
+                    className="w-full md:w-1/2 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus-ring transition-[background-color,border-color,box-shadow] duration-200 ease-in-out"
                     value={budgetUSD}
                     onChange={e => setBudget(e.target.value === "" ? "" : Number(e.target.value))}
                     placeholder="ex: 300"
@@ -198,7 +199,7 @@ export default function App() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed btn-hover focus-ring"
+                  className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed btn-hover focus-ring transition-[transform,box-shadow,background] duration-200 ease-in-out"
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">
@@ -211,7 +212,7 @@ export default function App() {
             </form>
 
             {err && (
-              <div className="mt-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-400">
+              <div className="mt-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-400 transition-[background-color,border-color] duration-300 ease-in-out">
                 {err}
               </div>
             )}
@@ -229,7 +230,7 @@ export default function App() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {items.map((item, index) => (
-                    <div key={index} className="bg-white/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-6 hover:shadow-lg transition-all">
+                    <div key={index} className="bg-white/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-6 hover:shadow-lg transition-[transform,box-shadow,background-color,border-color] duration-300 ease-in-out">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
                           <h4 className="font-semibold text-slate-900 dark:text-white text-lg mb-1">
@@ -275,7 +276,7 @@ export default function App() {
                 </div>
 
                 {/* AI Explanation Section */}
-                <div className="mt-12 bg-white/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+                <div id="ai" className="mt-12 bg-white/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-6 transition-[background-color,border-color] duration-300 ease-in-out">
                   <div className="text-center mb-6">
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
                       Precisa de ajuda para entender as recomendações?
@@ -320,7 +321,7 @@ export default function App() {
                           }
                         }}
                         disabled={aiLoading}
-                        className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed btn-hover focus-ring"
+                        className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed btn-hover focus-ring transition-[transform,box-shadow,background] duration-200 ease-in-out"
                       >
                         {aiLoading ? (
                           <div className="flex items-center gap-2">
@@ -332,13 +333,13 @@ export default function App() {
                     </div>
 
                     {aiError && (
-                      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-400">
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-400 transition-[background-color,border-color] duration-300 ease-in-out">
                         {aiError}
                       </div>
                     )}
 
                     {aiAnswer && (
-                      <div className="p-4 bg-slate-100 dark:bg-slate-700 rounded-xl">
+                      <div className="p-4 bg-slate-100 dark:bg-slate-700 rounded-xl transition-[background-color] duration-300 ease-in-out">
                         <h4 className="font-semibold text-slate-900 dark:text-white mb-2">Explicação:</h4>
                         <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
                           {aiAnswer}
@@ -357,7 +358,7 @@ export default function App() {
                       plan={buildStudyPlan({ role, seniority, targetArea, goals: goals.split(",").map(s => s.trim()).filter(Boolean) }, items)}
                     />}
                     fileName="plano-estudo-certificacoes.pdf"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg btn-hover focus-ring"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg btn-hover focus-ring transition-[transform,box-shadow,background] duration-200 ease-in-out"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -370,7 +371,7 @@ export default function App() {
           </div>
 
           {/* GitHub Evaluation Section */}
-          <div className="mt-16 glass rounded-2xl p-8 card-hover animate-slide-in-right">
+          <div id="github" className="mt-12 glass rounded-2xl p-8 card-hover animate-slide-in-right">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-slate-900 dark:bg-white rounded-xl flex items-center justify-center">
                 <svg className="w-6 h-6 text-white dark:text-slate-900" fill="currentColor" viewBox="0 0 24 24">
@@ -390,7 +391,7 @@ export default function App() {
                   value={githubUrl}
                   onChange={(e) => setGithubUrl(e.target.value)}
                   placeholder="https://github.com/seu-usuario"
-                  className="flex-1 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus-ring transition-all"
+                  className="flex-1 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus-ring transition-[background-color,border-color,box-shadow] duration-200 ease-in-out"
                 />
                 <button
                   onClick={async () => {
@@ -417,7 +418,7 @@ export default function App() {
                     }
                   }}
                   disabled={ghLoading || !githubUrl}
-                  className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed btn-hover focus-ring"
+                  className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed btn-hover focus-ring transition-[background-color,text-color,transform,box-shadow] duration-200 ease-in-out"
                 >
                   {ghLoading ? (
                     <div className="flex items-center gap-2">
@@ -429,13 +430,13 @@ export default function App() {
               </div>
               
               {ghError && (
-                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-400">
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-400 transition-[background-color,border-color] duration-300 ease-in-out">
                   {ghError}
                 </div>
               )}
               
               {ghResult && (
-                <div className="space-y-4 p-6 bg-white/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                <div className="space-y-4 p-6 bg-white/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 transition-[background-color,border-color] duration-300 ease-in-out">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-gradient-to-br from-slate-600 to-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                       <span className="text-white font-bold text-2xl">
@@ -510,7 +511,7 @@ export default function App() {
                   </div>
                   
                   {ghResult.assessment && (
-                    <div className="p-4 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                    <div className="p-4 bg-slate-100 dark:bg-slate-700 rounded-lg transition-[background-color] duration-300 ease-in-out">
                       <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
                         {ghResult.assessment}
                       </p>
@@ -523,6 +524,9 @@ export default function App() {
         </div>
       </div>
 
+      {/* Footer */}
+      <Footer />
+
       <style>{`
         .gradient-text {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -531,11 +535,7 @@ export default function App() {
           background-clip: text;
         }
         
-        .glass {
-          background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+        /* Glass morphism removido - usando estilo global */
         
         .card-hover {
           transition: all 0.3s ease;

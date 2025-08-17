@@ -10,6 +10,7 @@ Uma plataforma moderna e elegante para avaliação de perfis profissionais, reco
 - **Responsivo**: Layout adaptável para todos os dispositivos
 - **Tipografia Elegante**: Fonte Inter para máxima legibilidade
 - **Animações Suaves**: Transições e micro-interações para melhor experiência
+- **Footer Profissional**: Links para redes sociais e navegação rápida
 
 ### 🤖 **Avaliação de Perfis**
 - **GitHub Profile Analysis**: 
@@ -47,12 +48,12 @@ Uma plataforma moderna e elegante para avaliação de perfis profissionais, reco
 - ✅ **Pontos Fortes/Fracos**: Identificação automática de áreas
 - ✅ **Recomendações**: Sugestões personalizadas para melhoria
 
-### **LinkedIn Evaluation v2.0**
-- ✅ **Scraping Aprimorado**: Múltiplas estratégias de parsing
-- ✅ **Análise Completa**: Experiências, educação, habilidades
-- ✅ **Detecção de Senioridade**: IA para identificar nível profissional
-- ✅ **Scoring Inteligente**: Baseado em completude e qualidade
-- ✅ **Recomendações Profissionais**: Sugestões para otimização
+### **LinkedIn Evaluation v2.0** *(Em desenvolvimento)*
+- 🔄 **Scraping Aprimorado**: Múltiplas estratégias de parsing
+- 🔄 **Análise Completa**: Experiências, educação, habilidades
+- 🔄 **Detecção de Senioridade**: IA para identificar nível profissional
+- 🔄 **Scoring Inteligente**: Baseado em completude e qualidade
+- 🔄 **Recomendações Profissionais**: Sugestões para otimização
 
 ### **UI/UX Moderna**
 - ✅ **Design System**: Paleta de cores inspirada na LoVable/Vercel
@@ -60,6 +61,7 @@ Uma plataforma moderna e elegante para avaliação de perfis profissionais, reco
 - ✅ **Animações**: Transições suaves e micro-interações
 - ✅ **Responsividade**: Layout adaptável para todos os dispositivos
 - ✅ **Tipografia**: Fonte Inter para máxima legibilidade
+- ✅ **Footer Profissional**: Links para redes sociais e navegação rápida
 
 ## 🚀 Quick Start
 
@@ -116,7 +118,15 @@ O sistema analisa perfis GitHub considerando:
 - **Qualidade do Código** (0-15 pts): Estrelas, forks, manutenção
 - **Diversidade de Linguagens** (0-10 pts): Múltiplas tecnologias
 
-### **LinkedIn Profile Analysis**
+### **GitHub Profile Analysis**
+Avaliação de perfis GitHub considerando:
+- **Completude do Perfil** (0-20 pts): Nome, bio, empresa, localização
+- **Prova Social** (0-25 pts): Seguidores, alcance da comunidade
+- **Atividade de Repositórios** (0-30 pts): Quantidade e qualidade
+- **Qualidade do Código** (0-15 pts): Estrelas, forks, manutenção
+- **Diversidade de Linguagens** (0-10 pts): Múltiplas tecnologias
+
+### **LinkedIn Profile Analysis** *(Em desenvolvimento)*
 Avaliação profissional baseada em:
 - **Completude do Perfil** (0-25 pts): Nome, headline, resumo
 - **Seção de Experiências** (0-30 pts): Quantidade e detalhamento
@@ -129,6 +139,12 @@ Avaliação profissional baseada em:
 - **Personalização**: Baseado em objetivos e contexto profissional
 - **IA Integrada**: Explicações e insights personalizados
 - **Exportação**: Planos de estudo em PDF
+
+### **Footer e Navegação**
+- **Links para Redes Sociais**: GitHub, LinkedIn e site pessoal com ícones
+- **Navegação Rápida**: Links internos para todas as funcionalidades
+- **Design Responsivo**: Adaptável para todos os dispositivos
+- **Integração Visual**: Consistente com o design system da aplicação
 
 ## 🎨 **Design System**
 
@@ -156,16 +172,19 @@ Avaliação profissional baseada em:
 2. Clique em "Avaliar"
 3. Visualize o score, pontos fortes/fracos e recomendações
 
-### **LinkedIn Evaluation**
-1. Insira uma URL do LinkedIn (ex: `https://linkedin.com/in/username`)
-2. Clique em "Avaliar"
-3. Analise o perfil profissional completo
+### **LinkedIn Evaluation** *(Em desenvolvimento)*
+*Funcionalidade em desenvolvimento - em breve você poderá avaliar perfis do LinkedIn*
 
 ### **Certificações**
 1. Preencha o formulário com seus dados
 2. Receba recomendações personalizadas
 3. Exporte seu plano de estudo em PDF
 4. Use a IA para explicações adicionais
+
+### **Navegação e Footer**
+1. Use os links do footer para navegar rapidamente pelas seções
+2. Acesse suas redes sociais e site pessoal através dos ícones
+3. Explore as funcionalidades através dos links de navegação rápida
 
 ## 🚀 **Deploy**
 
@@ -179,9 +198,11 @@ A aplicação fica disponível em URL pública e pode ser usada como servidor MC
 ## 🔗 **Integrações**
 
 - **GitHub API**: Análise de perfis e repositórios
-- **LinkedIn Scraping**: Avaliação de perfis profissionais
+- **LinkedIn Scraping**: *(Em desenvolvimento)* Avaliação de perfis profissionais
 - **IA Integration**: Explicações e insights personalizados
 - **PDF Generation**: Exportação de planos de estudo
+- **Redes Sociais**: Links diretos para GitHub, LinkedIn e site pessoal
+- **Navegação por Âncoras**: Sistema de navegação interna otimizado
 
 ## 📚 **Tecnologias Utilizadas**
 
@@ -190,6 +211,7 @@ A aplicação fica disponível em URL pública e pode ser usada como servidor MC
 - **RPC**: TanStack Query, TypeScript RPC
 - **Design**: Glass morphism, gradientes, animações CSS
 - **Deploy**: Cloudflare Workers, Deco Platform
+- **Componentes**: Footer responsivo, navegação por âncoras, ícones SVG
 
 ## 🎯 **Roadmap Futuro**
 
@@ -198,6 +220,8 @@ A aplicação fica disponível em URL pública e pode ser usada como servidor MC
 - [ ] **Marketplace de Certificações**: Integração com provedores
 - [ ] **Mentoria IA**: Coaching personalizado para carreira
 - [ ] **Analytics Avançado**: Métricas de evolução profissional
+- [ ] **Integração com Redes Sociais**: Conectividade com LinkedIn, GitHub e outros
+- [ ] **Sistema de Notificações**: Alertas sobre novas certificações e oportunidades
 
 ## 🤝 **Contribuição**
 
