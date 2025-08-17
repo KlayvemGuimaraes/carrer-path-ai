@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import StudyPlanDoc from "./pdf/StudyPlanDoc";
+import { buildStudyPlan } from "./lib/studyPlan";
 
 type RecommendationItem = {
   certification: {
@@ -26,6 +29,16 @@ export default function App() {
   const [userQuestion, setUserQuestion] = useState<string>("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  // Avaliação de GitHub
+  const [githubUrl, setGithubUrl] = useState<string>("");
+  const [ghLoading, setGhLoading] = useState(false);
+  const [ghError, setGhError] = useState<string | null>(null);
+  const [ghResult, setGhResult] = useState<any | null>(null);
+  // Avaliação de LinkedIn
+  const [linkedinUrl, setLinkedinUrl] = useState<string>("");
+  const [liLoading, setLiLoading] = useState(false);
+  const [liError, setLiError] = useState<string | null>(null);
+  const [liResult, setLiResult] = useState<any | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +77,132 @@ export default function App() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-white">CarrerPath — Recomendações de Certificações</h1>
+
+      {/* Avaliação de GitHub */}
+      <div className="rounded-xl border border-slate-700 bg-slate-900/40 p-4 space-y-3">
+        <h2 className="text-lg font-medium text-white">Avaliar GitHub</h2>
+        <div className="flex flex-col md:flex-row gap-2 md:items-center">
+          <input
+            className="flex-1 rounded-lg bg-slate-900/60 border border-slate-600 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="https://github.com/usuario (ou cole a URL do perfil)"
+            value={githubUrl}
+            onChange={(e) => setGithubUrl(e.target.value)}
+          />
+          <button
+            onClick={async () => {
+              setGhError(null); setGhResult(null); setGhLoading(true);
+              try {
+                const res = await fetch('/api/eval/github', {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ url: githubUrl })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data?.error || `Falha (HTTP ${res.status})`);
+                setGhResult(data);
+              } catch (e:any) {
+                setGhError(e?.message || 'Não foi possível avaliar o GitHub');
+              } finally {
+                setGhLoading(false);
+              }
+            }}
+            disabled={ghLoading || !githubUrl.trim()}
+            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 shadow-md transition-colors"
+          >
+            {ghLoading ? 'Avaliando...' : 'Avaliar GitHub'}
+          </button>
+        </div>
+        {ghError && <p className="text-red-400 text-sm">{ghError}</p>}
+        {ghResult && (
+          <div className="text-sm text-slate-200 space-y-2">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <strong>{ghResult.username}</strong>{' '}
+                <a className="text-blue-400 hover:underline" href={ghResult.profileUrl} target="_blank" rel="noreferrer">perfil</a>
+              </div>
+              <div className="text-slate-400">
+                Followers: {ghResult.stats?.followers ?? 0} • Repos: {ghResult.stats?.publicRepos ?? 0} • Stars: {ghResult.stats?.totalStars ?? 0}
+              </div>
+            </div>
+            {Array.isArray(ghResult.stats?.topLanguages) && ghResult.stats.topLanguages.length > 0 && (
+              <div className="text-slate-300">
+                Top linguagens: {ghResult.stats.topLanguages.map((l:any) => l.language).join(', ')}
+              </div>
+            )}
+            {Array.isArray(ghResult.stats?.recentRepos) && ghResult.stats.recentRepos.length > 0 && (
+              <div className="text-slate-300">
+                Repositórios recentes: {ghResult.stats.recentRepos.map((r:any) => r.name).join(', ')}
+              </div>
+            )}
+            {ghResult.assessment && (
+              <div className="whitespace-pre-wrap border border-slate-700 bg-slate-900/60 text-slate-100 p-3 rounded-lg">
+                {ghResult.assessment}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Avaliação de LinkedIn */}
+      <div className="rounded-xl border border-slate-700 bg-slate-900/40 p-4 space-y-3">
+        <h2 className="text-lg font-medium text-white">Avaliar LinkedIn</h2>
+        <div className="flex flex-col md:flex-row gap-2 md:items-center">
+          <input
+            className="flex-1 rounded-lg bg-slate-900/60 border border-slate-600 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="https://www.linkedin.com/in/usuario/"
+            value={linkedinUrl}
+            onChange={(e) => setLinkedinUrl(e.target.value)}
+          />
+          <button
+            onClick={async () => {
+              setLiError(null); setLiResult(null); setLiLoading(true);
+              try {
+                const res = await fetch('/api/eval/linkedin', {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ url: linkedinUrl })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data?.error || `Falha (HTTP ${res.status})`);
+                setLiResult(data);
+              } catch (e:any) {
+                setLiError(e?.message || 'Não foi possível avaliar o LinkedIn');
+              } finally {
+                setLiLoading(false);
+              }
+            }}
+            disabled={liLoading || !linkedinUrl.trim()}
+            className="inline-flex items-center gap-2 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 shadow-md transition-colors"
+          >
+            {liLoading ? 'Avaliando...' : 'Avaliar LinkedIn'}
+          </button>
+        </div>
+        {liError && <p className="text-red-400 text-sm">{liError}</p>}
+        {liResult && (
+          <div className="text-sm text-slate-200 space-y-2">
+            <div className="text-slate-300">
+              {liResult.name && <div><strong>{liResult.name}</strong></div>}
+              {liResult.headline && <div>Headline: {liResult.headline}</div>}
+              {typeof liResult.score === 'number' && (
+                <div className="mt-1">Nota final: <strong>{liResult.score}/100</strong></div>
+              )}
+            </div>
+            {Array.isArray(liResult.strengths) && liResult.strengths.length > 0 && (
+              <div className="text-slate-300">
+                Pontos fortes: {liResult.strengths.join(', ')}
+              </div>
+            )}
+            {Array.isArray(liResult.weaknesses) && liResult.weaknesses.length > 0 && (
+              <div className="text-slate-300">
+                Pontos fracos: {liResult.weaknesses.join(', ')}
+              </div>
+            )}
+            {liResult.assessment && (
+              <div className="whitespace-pre-wrap border border-slate-700 bg-slate-900/60 text-slate-100 p-3 rounded-lg">
+                {liResult.assessment}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="col-span-1">
@@ -144,6 +283,43 @@ export default function App() {
       {!!items.length && (
         <div className="space-y-3">
           <h2 className="text-lg font-medium text-white mt-2">Top recomendações</h2>
+          {/* Export PDF */}
+          <div className="flex justify-end">
+            <PDFDownloadLink
+              document={(
+                <StudyPlanDoc
+                  profile={{
+                    role,
+                    seniority,
+                    targetArea,
+                    goals: goals.split(",").map((s) => s.trim()).filter(Boolean),
+                    budgetUSD: budgetUSD === '' ? undefined : Number(budgetUSD),
+                  }}
+                  items={items}
+                  plan={buildStudyPlan(
+                    {
+                      role,
+                      seniority,
+                      targetArea,
+                      goals: goals.split(",").map((s) => s.trim()).filter(Boolean),
+                      budgetUSD: budgetUSD === '' ? undefined : Number(budgetUSD),
+                    },
+                    items,
+                  )}
+                />
+              )}
+              fileName={`careerpath-plano-${new Date().toISOString().slice(0,10)}.pdf`}
+            >
+              {({ loading }: { loading: boolean }) => (
+                <button
+                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 shadow-md transition-colors"
+                  disabled={loading}
+                >
+                  {loading ? "Gerando PDF..." : "Exportar PDF"}
+                </button>
+              )}
+            </PDFDownloadLink>
+          </div>
           <ul className="grid gap-3">
             {items.map((it) => (
               <li key={it.certification.id} className="rounded-xl border border-slate-700 bg-slate-900/40 p-4">
