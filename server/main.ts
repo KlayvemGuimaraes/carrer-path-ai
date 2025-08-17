@@ -8,7 +8,7 @@ import { DefaultEnv, withRuntime } from "@deco/workers-runtime";
 import { type Env as DecoEnv, StateSchema } from "./deco.gen.ts";
 import { tools } from "./tools/index.ts";
 import createGitHubEvalTool from "./tools/githubEval.ts";
-import createLinkedInEvalTool from "./tools/linkedinEval.ts";
+
 import { workflows } from "./workflows.ts";
 import { RecommendationResponseSchema, UserProfileSchema } from "./schemas.ts";
 import { runCertRecommend } from "./tools/certRecommend.ts";
@@ -77,23 +77,7 @@ async function handleEvalGitHub(request: Request, env: Env): Promise<Response> {
   }
 }
 
-/**
- * Handles the /api/eval/linkedin endpoint logic.
- */
-async function handleEvalLinkedIn(request: Request, env: Env): Promise<Response> {
-  if (request.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
-  }
-  try {
-    const body = await request.json().catch(() => ({}));
-    const tool = createLinkedInEvalTool(env);
-    const result = await (tool as any).execute({ context: { url: body.url } });
-    return Response.json(result);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "An unknown error occurred";
-    return new Response(JSON.stringify({ error: message }), { status: 400, headers: { "Content-Type": "application/json" } });
-  }
-}
+
 
 /**
  * Handles the /api/ai/explain endpoint logic.
@@ -181,9 +165,7 @@ const fetchHandler = (
   if (url.pathname === "/api/eval/github") {
     return handleEvalGitHub(req, env);
   }
-  if (url.pathname === "/api/eval/linkedin") {
-    return handleEvalLinkedIn(req, env);
-  }
+  
 
   // Fallback to serving the React frontend
   const LOCAL_URL = "http://localhost:4000";

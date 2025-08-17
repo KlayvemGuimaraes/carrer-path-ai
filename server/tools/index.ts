@@ -10,7 +10,7 @@ import createHelloTool from "./hello.ts";
 import createCertSearchTool from "./certSearch.ts";
 import createCertRecommendTool from "./certRecommend.ts";
 import createGitHubEvalTool from "./githubEval.ts";
-import createLinkedInEvalTool from "./linkedinEval.ts";
+
 
 // The `tools` array is registered with the Deco runtime.
 // It should contain the "factory functions" that create the tools.
@@ -19,5 +19,4 @@ export const tools = [
   createCertSearchTool,
   createCertRecommendTool,
   createGitHubEvalTool,
-  createLinkedInEvalTool,
 ];
