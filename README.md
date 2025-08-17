@@ -288,6 +288,17 @@ O CarrerPath implementa um **recorte específico e bem definido**:
 - ✅ **Tipografia**: Fonte Inter para máxima legibilidade
 - ✅ **Footer Profissional**: Links para redes sociais e navegação rápida
 
+## 🌐 **Links de Deploy**
+
+### **Produção**
+- **Aplicação Principal**: https://carrerpath-app-2024.deco.page
+- **URL Alternativa**: https://carrerpath-app-2024--g5q1loohhc.deco.page
+
+### **Status do Deploy**
+✅ **Deploy Ativo** - A aplicação está funcionando em produção e pode ser acessada por qualquer pessoa através dos links acima.
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -559,6 +570,31 @@ Contribuições são bem-vindas! Por favor:
 ## 📄 **Licença**
 
 Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para detalhes.
+
+---
+
+## 🎉 **Aplicação Disponível Publicamente!**
+
+A aplicação **CarrerPath** está agora **deployada e funcionando** em produção! Qualquer pessoa pode acessar e usar todas as funcionalidades:
+
+### **🔗 Links de Acesso**
+- **URL Principal**: https://carrerpath-app-2024.deco.page
+- **URL Alternativa**: https://carrerpath-app-2024--g5q1loohhc.deco.page
+
+### **✨ Funcionalidades Disponíveis**
+- ✅ **Análise de Perfis GitHub** - Avaliação completa de perfis profissionais
+- ✅ **Recomendações de Certificações** - Sugestões personalizadas baseadas em perfil
+- ✅ **Integração com IA** - Explicações detalhadas e insights personalizados
+- ✅ **Exportação de PDF** - Planos de estudo personalizados
+- ✅ **Interface Moderna** - Design responsivo e elegante
+- ✅ **Tema Claro/Escuro** - Alternância suave entre temas
+
+### **🚀 Teste Agora Mesmo!**
+1. Acesse um dos links acima
+2. Teste a análise de um perfil GitHub
+3. Experimente as recomendações de certificações
+4. Use a funcionalidade de IA para explicações detalhadas
+5. Exporte seu plano de estudo em PDF
 
 ---
 
